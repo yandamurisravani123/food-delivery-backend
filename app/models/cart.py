@@ -1,8 +1,15 @@
-from sqlalchemy import Column, Integer, ForeignKey
+import uuid
+
+from sqlalchemy import (
+    Column,
+    Integer,
+    ForeignKey,
+    Float
+)
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
+
 from app.config.database import Base
-import uuid
 
 
 class Cart(Base):
@@ -16,13 +23,13 @@ class Cart(Base):
 
     customer_id = Column(
         UUID(as_uuid=True),
-        ForeignKey("users.id"),
+        ForeignKey("customers.id"),
         nullable=False
     )
 
     menu_item_id = Column(
         UUID(as_uuid=True),
-        ForeignKey("menu_items.id"),   # FIXED
+        ForeignKey("menu_items.id"),
         nullable=False
     )
 
@@ -31,5 +38,15 @@ class Cart(Base):
         default=1
     )
 
-    customer = relationship("Customer")
-    menu_item = relationship("MenuItem")
+    price = Column(
+        Float,
+        nullable=False
+    )
+
+    customer = relationship(
+        "Customer"
+    )
+
+    menu_item = relationship(
+        "MenuItem"
+    )
