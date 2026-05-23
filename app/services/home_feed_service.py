@@ -1,11 +1,26 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, desc
+from sqlalchemy import select
 
 from app.models.restaurant import Restaurant
 from app.models.cart import Cart
 
 
 class HomeFeedService:
+
+    # BANNERS
+    @staticmethod
+    async def banners():
+
+        return [
+            {
+                "title": "50% OFF",
+                "image": "banner1.png"
+            },
+            {
+                "title": "Free Delivery",
+                "image": "banner2.png"
+            }
+        ]
 
     # PICKED FOR YOU
     @staticmethod
@@ -14,8 +29,7 @@ class HomeFeedService:
     ):
 
         result = await db.execute(
-            select(Restaurant)
-            .limit(5)
+            select(Restaurant).limit(5)
         )
 
         return result.scalars().all()
@@ -27,53 +41,51 @@ class HomeFeedService:
     ):
 
         result = await db.execute(
-            select(Restaurant)
-            .limit(10)
+            select(Restaurant).limit(10)
         )
 
         return result.scalars().all()
 
-    # EXPLORE CUISINES
+    # TRENDING
+    @staticmethod
+    async def trending_restaurants(
+        db: AsyncSession
+    ):
+
+        result = await db.execute(
+            select(Restaurant).limit(8)
+        )
+
+        return result.scalars().all()
+
+    # CUISINES
     @staticmethod
     async def cuisines():
 
         return [
             "Pizza",
             "Burger",
-            "Sushi",
             "Asian",
+            "Healthy",
             "Desserts",
             "Indian",
             "Chinese"
         ]
 
-    # FILTERS
+    # OFFERS
     @staticmethod
-    async def filtered_restaurants(
-        db: AsyncSession,
-        cuisine: str = None,
-        min_rating: float = None
-    ):
+    async def offers():
 
-        query = select(Restaurant)
-
-        if cuisine:
-            query = query.where(
-                Restaurant.cuisine_type.ilike(
-                    f"%{cuisine}%"
-                )
-            )
-
-        if min_rating:
-            query = query.where(
-                Restaurant.rating >= min_rating
-            )
-
-        result = await db.execute(
-            query
-        )
-
-        return result.scalars().all()
+        return [
+            {
+                "title": "50% OFF",
+                "coupon_code": "SAVE50"
+            },
+            {
+                "title": "Free Delivery",
+                "coupon_code": "FREEDEL"
+            }
+        ]
 
     # CART COUNT
     @staticmethod
@@ -92,7 +104,9 @@ class HomeFeedService:
             result.scalars().all()
         )
 
-        return len(cart_items)
+        return {
+            "cart_count": len(cart_items)
+        }
 
     # COMPLETE HOME FEED
     @staticmethod
@@ -101,35 +115,32 @@ class HomeFeedService:
         customer_id=None
     ):
 
-        picked = await (
-            HomeFeedService
-            .picked_for_you(db)
-        )
+        return {
+            "banners": await HomeFeedService.banners(),
+            "picked_for_you":
+                await HomeFeedService
+                .picked_for_you(db),
 
-        popular = await (
-            HomeFeedService
-            .popular_near_you(db)
-        )
+            "popular_near_you":
+                await HomeFeedService
+                .popular_near_you(db),
 
-        cuisines = await (
-            HomeFeedService
-            .cuisines()
-        )
+            "trending_restaurants":
+                await HomeFeedService
+                .trending_restaurants(db),
 
-        cart_items = 0
+            "cuisines":
+                await HomeFeedService
+                .cuisines(),
 
-        if customer_id:
-            cart_items = await (
-                HomeFeedService
+            "offers":
+                await HomeFeedService
+                .offers(),
+
+            "cart_count":
+                await HomeFeedService
                 .cart_count(
                     db,
                     customer_id
-                )
-            )
-
-        return {
-            "picked_for_you": picked,
-            "explore_cuisines": cuisines,
-            "popular_near_you": popular,
-            "cart_count": cart_items
+                ) if customer_id else 0
         }

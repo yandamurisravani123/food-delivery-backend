@@ -15,11 +15,14 @@ from app.services.home_feed_service import (
 )
 
 router = APIRouter(
-    prefix="/api/v1/customer/home",
+    prefix="/api/v1/home-feed",
     tags=["Home Feed"]
 )
 
 
+# ==========================
+# COMPLETE HOME FEED
+# ==========================
 @router.get("/")
 async def home_feed(
     customer_id: str = None,
@@ -34,6 +37,20 @@ async def home_feed(
     )
 
 
+# ==========================
+# BANNERS
+# ==========================
+@router.get("/banners")
+async def banners():
+
+    return await (
+        HomeFeedService.banners()
+    )
+
+
+# ==========================
+# PICKED FOR YOU
+# ==========================
 @router.get("/picked")
 async def picked_for_you(
     db: AsyncSession = Depends(get_db)
@@ -45,6 +62,37 @@ async def picked_for_you(
     )
 
 
+# ==========================
+# POPULAR NEAR YOU
+# ==========================
+@router.get("/popular")
+async def popular_near_you(
+    db: AsyncSession = Depends(get_db)
+):
+
+    return await (
+        HomeFeedService
+        .popular_near_you(db)
+    )
+
+
+# ==========================
+# TRENDING RESTAURANTS
+# ==========================
+@router.get("/trending")
+async def trending_restaurants(
+    db: AsyncSession = Depends(get_db)
+):
+
+    return await (
+        HomeFeedService
+        .trending_restaurants(db)
+    )
+
+
+# ==========================
+# CUISINES
+# ==========================
 @router.get("/cuisines")
 async def cuisines():
 
@@ -54,12 +102,31 @@ async def cuisines():
     )
 
 
-@router.get("/popular")
-async def popular_near_you(
+# ==========================
+# OFFERS
+# ==========================
+@router.get("/offers")
+async def offers():
+
+    return await (
+        HomeFeedService
+        .offers()
+    )
+
+
+# ==========================
+# CART COUNT
+# ==========================
+@router.get("/cart-count/{customer_id}")
+async def cart_count(
+    customer_id: str,
     db: AsyncSession = Depends(get_db)
 ):
 
     return await (
         HomeFeedService
-        .popular_near_you(db)
+        .cart_count(
+            db=db,
+            customer_id=customer_id
+        )
     )

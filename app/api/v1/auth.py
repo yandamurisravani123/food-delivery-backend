@@ -148,7 +148,7 @@ async def reset_password(
     return await AuthService.reset_password(session, payload)
 
 
-@router.post("/logout", response_model=MessageResponse)
+@router.postc("/logout", response_model=MessageResponse)
 async def logout(
     credentials: HTTPAuthorizationCredentials = Depends(security),
 ):
@@ -158,3 +158,7 @@ async def logout(
 @router.get("/me")
 async def me(current_user=Depends(get_current_user)):
     return current_user
+
+
+
+

@@ -14,6 +14,10 @@ from app.api.v1.customer_discovery_router import (
     router as customer_discovery_router
 )
 
+from app.api.v1.customer_home_router import (
+    router as home_feed_router
+)
+
 from app.config.database import (
     engine,
     Base
@@ -63,6 +67,10 @@ app.include_router(
 # CUSTOMER DISCOVERY ROUTER
 app.include_router(
     customer_discovery_router
+)
+
+app.include_router(
+    home_feed_router
 )
 
 
