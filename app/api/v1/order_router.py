@@ -1,12 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException
-
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 
 from app.config.database import get_db
 from app.models.order import Order
-from app.schemas.order import OrderCreate
-
+from app.models.user import User
+from app.schemas.order import (
+    OrderCreate,
+    OrderResponse
+)
 
 router = APIRouter(
     prefix="/orders",
@@ -14,38 +16,46 @@ router = APIRouter(
 )
 
 
-# CREATE ORDER
-@router.post("/")
+@router.post("/", response_model=OrderResponse)
 async def create_order(
-    payload: OrderCreate,
+    order: OrderCreate,
     db: AsyncSession = Depends(get_db)
 ):
+    try:
+        # check user exists
+        user = await db.get(User, order.user_id)
 
-    new_order = Order(
-        user_id=payload.user_id,
-        food_name=payload.food_name,
-        cuisine=payload.cuisine,
-        order_time=payload.order_time
-    )
+        if not user:
+            raise HTTPException(
+                status_code=404,
+                detail="User not found"
+            )
 
-    db.add(new_order)
+        new_order = Order(
+            user_id=order.user_id,
+            food_name=order.food_name,
+            cuisine=order.cuisine,
+            order_time=order.order_time
+        )
 
-    await db.commit()
+        db.add(new_order)
 
-    await db.refresh(new_order)
+        await db.commit()
+        await db.refresh(new_order)
 
-    return {
-        "message": "Order created successfully",
-        "data": new_order
-    }
+        return new_order
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=str(e)
+        )
 
 
-# GET ALL ORDERS
-@router.get("/")
+@router.get("/", response_model=list[OrderResponse])
 async def get_orders(
     db: AsyncSession = Depends(get_db)
 ):
-
     result = await db.execute(
         select(Order)
     )
@@ -53,57 +63,3 @@ async def get_orders(
     orders = result.scalars().all()
 
     return orders
-
-
-# GET SINGLE ORDER
-@router.get("/{order_id}")
-async def get_single_order(
-    order_id: int,
-    db: AsyncSession = Depends(get_db)
-):
-
-    result = await db.execute(
-        select(Order).where(
-            Order.id == order_id
-        )
-    )
-
-    order = result.scalar()
-
-    if not order:
-        raise HTTPException(
-            status_code=404,
-            detail="Order not found"
-        )
-
-    return order
-
-
-# DELETE ORDER
-@router.delete("/{order_id}")
-async def delete_order(
-    order_id: int,
-    db: AsyncSession = Depends(get_db)
-):
-
-    result = await db.execute(
-        select(Order).where(
-            Order.id == order_id
-        )
-    )
-
-    order = result.scalar()
-
-    if not order:
-        raise HTTPException(
-            status_code=404,
-            detail="Order not found"
-        )
-
-    await db.delete(order)
-
-    await db.commit()
-
-    return {
-        "message": "Order deleted successfully"
-    }

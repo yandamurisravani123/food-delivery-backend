@@ -14,7 +14,9 @@ from app.models import (
     food,
     user_preference,
     cart,
-    order_tracking
+    order_tracking,
+    delivery_notification,
+    restaurant
 )
 
 
@@ -54,12 +56,21 @@ from app.api.v1.order_tracking import (
     router as order_tracking_router
 )
 
+from app.api.v1.delivery_notification_router import (
+    router as delivery_notification_router
+)
+
 
 
 
 from app.core.redis_client import (
     connect_redis,
     close_redis
+)
+
+from app.models import (
+    user,
+    order
 )
 
 
@@ -131,6 +142,11 @@ app.include_router(
 
 app.include_router(
     order_tracking_router,
+    prefix="/api/v1"
+)
+
+app.include_router(
+    delivery_notification_router,
     prefix="/api/v1"
 )
 
