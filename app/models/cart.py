@@ -31,5 +31,5 @@ class Cart(Base):
         default=1
     )
 
-    customer = relationship("Customer")
+    customer = relationship("User")
     menu_item = relationship("MenuItem")

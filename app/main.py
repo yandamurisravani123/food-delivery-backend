@@ -15,15 +15,18 @@ from app.models import (
     order,
     food,
     user_preference,
-    cart
+    cart,checkout,invoice,
+    invoice_item,restaurant,
+    payment
+
 )
 
 # =====================================================
 # ROUTERS
 # =====================================================
 
-from app.api.v1.admin.super_admin import (
-    router as super_admin
+from app.api.v1.superadmin_router import (
+    router as superadmin_router
 )
 
 from app.api.v1.auth import (
@@ -52,6 +55,22 @@ from app.api.v1.customer_discovery_router import (
 
 from app.api.v1.cart_router import (
     router as cart_router
+)
+
+from app.api.v1.checkout_router import (
+    router as checkout_router
+)
+
+from app.api.v1.invoice_router import (
+    router as invoice_router
+)
+
+from app.api.v1.restaurant_router import (
+    router as restaurant_router
+)
+
+from app.api.v1.payment_router import (
+    router as payment_router
 )
 
 # =====================================================
@@ -110,7 +129,7 @@ app.include_router(
 )
 
 app.include_router(
-    super_admin,
+    superadmin_router,
     prefix="/api/v1"
 )
 
@@ -128,6 +147,26 @@ app.include_router(
 
 app.include_router(
     recommendation_router,
+    prefix="/api/v1"
+)
+
+app.include_router(
+    checkout_router,
+    prefix="/api/v1"
+)
+
+app.include_router(
+    invoice_router,
+    prefix="/api/v1"
+)
+
+app.include_router(
+    restaurant_router,
+    prefix="/api/v1"
+)
+
+app.include_router(
+    payment_router,
     prefix="/api/v1"
 )
 
