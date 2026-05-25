@@ -89,3 +89,6 @@ class RestaurantRepository:
             select(Restaurant).where(Restaurant.id == restaurant_id)
         )
         return result.scalar_one_or_none()
+    
+
+    

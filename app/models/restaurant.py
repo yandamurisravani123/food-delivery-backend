@@ -70,3 +70,4 @@ fssai_license_file = Column(String(255), nullable=True)
 cancelled_cheque = Column(String(255), nullable=True)
 
 
+
