@@ -1,28 +1,34 @@
-from app.repositories.cart_repository import CartRepository
+from app.repositories.cart_repository import (
+    CartRepository
+)
 
 
 class CartService:
 
     @staticmethod
     async def add_to_cart(
-        session,
+        db,
         user_id,
-        payload
+        food_id,
+        quantity
     ):
-        return await CartRepository.add_to_cart(
-            session=session,
-            user_id=user_id,
-            food_id=payload.food_id,
-            quantity=payload.quantity,
-            customization=payload.customization
+        return await (
+            CartRepository.add_to_cart(
+                db,
+                user_id,
+                food_id,
+                quantity
+            )
         )
 
     @staticmethod
     async def get_cart(
-        session,
+        db,
         user_id
     ):
-        return await CartRepository.get_cart(
-            session,
-            user_id
+        return await (
+            CartRepository.get_cart(
+                db,
+                user_id
+            )
         )

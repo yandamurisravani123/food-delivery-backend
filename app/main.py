@@ -6,21 +6,17 @@ from app.config.database import (
     Base
 )
 
-# =====================================================
-# IMPORT MODELS
-# =====================================================
+
 
 from app.models import (
     user,
     order,
     food,
     user_preference,
-    cart
+    cart,
+    order_tracking
 )
 
-# =====================================================
-# ROUTERS
-# =====================================================
 
 from app.api.v1.admin.super_admin import (
     router as super_admin
@@ -54,18 +50,18 @@ from app.api.v1.cart_router import (
     router as cart_router
 )
 
-# =====================================================
-# REDIS
-# =====================================================
+from app.api.v1.order_tracking import (
+    router as order_tracking_router
+)
+
+
+
 
 from app.core.redis_client import (
     connect_redis,
     close_redis
 )
 
-# =====================================================
-# APP LIFESPAN
-# =====================================================
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -78,31 +74,23 @@ async def lifespan(app: FastAPI):
 
     print("✅ Database Connected")
 
-    # CONNECT REDIS
     await connect_redis()
 
     print("✅ Redis Connected")
 
     yield
 
-    # CLOSE REDIS
     await close_redis()
 
     print("❌ Redis Disconnected")
 
 
-# =====================================================
-# FASTAPI APP
-# =====================================================
 
 app = FastAPI(
     title="Food Delivery Backend",
     lifespan=lifespan
 )
 
-# =====================================================
-# INCLUDE ROUTERS
-# =====================================================
 
 app.include_router(
     auth,
@@ -141,9 +129,11 @@ app.include_router(
     prefix="/api/v1"
 )
 
-# =====================================================
-# ROOT API
-# =====================================================
+app.include_router(
+    order_tracking_router,
+    prefix="/api/v1"
+)
+
 
 @app.get("/")
 async def root():
