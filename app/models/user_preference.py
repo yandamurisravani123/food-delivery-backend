@@ -7,16 +7,16 @@ from sqlalchemy import (
 from app.config.database import Base
 
 
-class Order(Base):
+class UserPreference(Base):
 
-    __tablename__ = "orders"
+    __tablename__ = "user_preferences"
 
     id = Column(Integer, primary_key=True)
 
     user_id = Column(Integer)
 
-    food_name = Column(String)
+    favorite_cuisine = Column(String)
 
-    cuisine = Column(String)
+    spicy_level = Column(String)
 
-    order_time = Column(String)
+    preferred_food_type = Column(String)
