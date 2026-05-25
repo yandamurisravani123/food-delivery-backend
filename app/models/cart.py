@@ -1,11 +1,5 @@
 import uuid
-
-from sqlalchemy import (
-    Column,
-    Integer,
-    ForeignKey,
-    Float
-)
+from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
@@ -15,38 +9,20 @@ from app.config.database import Base
 class Cart(Base):
     __tablename__ = "cart"
 
-    id = Column(
-        UUID(as_uuid=True),
-        primary_key=True,
-        default=uuid.uuid4
-    )
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
 
-    customer_id = Column(
+    user_id = Column(
         UUID(as_uuid=True),
-        ForeignKey("customers.id"),
+        ForeignKey("users.id"),
         nullable=False
     )
 
-    menu_item_id = Column(
+    food_id = Column(
         UUID(as_uuid=True),
-        ForeignKey("menu_items.id"),
+        ForeignKey("menu.id"),
         nullable=False
     )
 
-    quantity = Column(
-        Integer,
-        default=1
-    )
+    quantity = Column(Integer, default=1)
 
-    price = Column(
-        Float,
-        nullable=False
-    )
-
-    customer = relationship(
-        "Customer"
-    )
-
-    menu_item = relationship(
-        "MenuItem"
-    )
+    customization = Column(String, nullable=True)

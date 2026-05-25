@@ -42,8 +42,6 @@ class Restaurant(Base):
     fssai_number = Column(String(50), nullable=True)
     logo_url = Column(String(255), nullable=True)
 
-    is_draft = Column(Boolean, default=True)
-
     status = Column(String(20), nullable=False, default="pending")  # pending / approved / rejected
     is_active = Column(Boolean, nullable=False, default=False)
 
@@ -52,21 +50,3 @@ class Restaurant(Base):
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
-    
-    logo_url = Column(String(255), nullable=True)
-
-    bank_account_holder = Column(String(150), nullable=True)
-
-bank_account_number = Column(String(50), nullable=True)
-
-ifsc_code = Column(String(20), nullable=True)
-
-is_draft = Column(Boolean, default=True)
-
-gst_certificate = Column(String(255), nullable=True)
-
-fssai_license_file = Column(String(255), nullable=True)
-
-cancelled_cheque = Column(String(255), nullable=True)
-
-

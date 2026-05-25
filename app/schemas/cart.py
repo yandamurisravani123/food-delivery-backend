@@ -1,17 +1,13 @@
 from pydantic import BaseModel
 from uuid import UUID
+from typing import Optional
 
 
-class AddToCartSchema(BaseModel):
-    menu_item_id: UUID
+class AddToCartRequest(BaseModel):
+    food_id: UUID
     quantity: int = 1
+    customization: Optional[str] = None
 
 
-class CartResponse(BaseModel):
-    id: UUID
-    customer_id: UUID
-    menu_item_id: UUID
+class UpdateCartRequest(BaseModel):
     quantity: int
-
-    class Config:
-        from_attributes = True
