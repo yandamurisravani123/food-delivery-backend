@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 
 from app.config.database import get_db
 from app.models.cart import Cart
-from app.models.user import User
 from app.models.food import Food
 
 router = APIRouter(
@@ -14,61 +14,39 @@ router = APIRouter(
 
 @router.post("/add")
 async def add_to_cart(
-    user_id: int,
     food_id: int,
     quantity: int,
+    user_id: str,
     db: AsyncSession = Depends(get_db)
 ):
-    try:
-        print("STEP 1")
 
-        user = await db.get(User, user_id)
-        print("USER:", user)
-
-        if not user:
-            raise HTTPException(
-                status_code=404,
-                detail="User not found"
-            )
-
-        food = await db.get(Food, food_id)
-        print("FOOD:", food)
-
-        if not food:
-            raise HTTPException(
-                status_code=404,
-                detail="Food not found"
-            )
-
-        cart_item = Cart(
-            user_id=user_id,
-            food_id=food_id,
-            quantity=quantity
+    result = await db.execute(
+        select(Food).where(
+            Food.id == food_id
         )
+    )
 
-        print("STEP 2")
+    food = result.scalar_one_or_none()
 
-        db.add(cart_item)
-
-        print("STEP 3")
-
-        await db.commit()
-
-        print("STEP 4")
-
-        await db.refresh(cart_item)
-
-        print("STEP 5")
-
-        return {
-            "message": "Added to cart successfully",
-            "cart_id": cart_item.id
-        }
-
-    except Exception as e:
-        print("FULL ERROR:", str(e))
-
+    if not food:
         raise HTTPException(
-            status_code=500,
-            detail=str(e)
+            status_code=404,
+            detail="Food not found"
         )
+
+    cart_item = Cart(
+        user_id=user_id,
+        food_id=food_id,
+        quantity=quantity
+    )
+
+    db.add(cart_item)
+
+    # IMPORTANT
+    await db.commit()
+    await db.refresh(cart_item)
+
+    return {
+        "success": True,
+        "message": "Added to cart successfully"
+    }

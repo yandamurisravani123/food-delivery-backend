@@ -1,13 +1,19 @@
-from pydantic import BaseModel
-from uuid import UUID
-from typing import Optional
+async def add_to_cart_service(
+    request,
+    db: AsyncSession
+):
 
+    cart_item = Cart(
+        user_id=request.user_id,
+        food_id=request.food_id,
+        quantity=request.quantity
+    )
 
-class AddToCartRequest(BaseModel):
-    food_id: UUID
-    quantity: int = 1
-    customization: Optional[str] = None
+    db.add(cart_item)
 
+    # ADD HERE
+    await db.commit()
 
-class UpdateCartRequest(BaseModel):
-    quantity: int
+    await db.refresh(cart_item)
+
+    return cart_item

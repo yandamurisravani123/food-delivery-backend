@@ -16,7 +16,8 @@ from app.models import (
     cart,
     order_tracking,
     delivery_notification,
-    restaurant
+    restaurant,
+    payment
 )
 
 
@@ -58,6 +59,10 @@ from app.api.v1.order_tracking import (
 
 from app.api.v1.delivery_notification_router import (
     router as delivery_notification_router
+)
+
+from app.api.v1.payment_router import (
+    router as payment_router
 )
 
 
@@ -147,6 +152,11 @@ app.include_router(
 
 app.include_router(
     delivery_notification_router,
+    prefix="/api/v1"
+)
+
+app.include_router(
+    payment_router,
     prefix="/api/v1"
 )
 
