@@ -9,6 +9,7 @@ from app.config.database import (
 
 
 from app.models import (
+    payment_method,
     user,
     order,
     food,
@@ -16,8 +17,7 @@ from app.models import (
     cart,
     order_tracking,
     delivery_notification,
-    restaurant,
-    payment
+    restaurant
 )
 
 
@@ -61,7 +61,7 @@ from app.api.v1.delivery_notification_router import (
     router as delivery_notification_router
 )
 
-from app.api.v1.payment_router import (
+from app.api.v1.payment_method import (
     router as payment_router
 )
 
@@ -159,7 +159,6 @@ app.include_router(
     payment_router,
     prefix="/api/v1"
 )
-
 
 @app.get("/")
 async def root():
