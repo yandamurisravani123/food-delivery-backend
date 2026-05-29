@@ -1,13 +1,9 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 
-from app.config.database import (
-    engine,
-    Base
-)
+from app.config.database import engine, Base
 
-
-
+# MODELS
 from app.models import (
     payment_method,
     user,
@@ -17,10 +13,11 @@ from app.models import (
     cart,
     order_tracking,
     delivery_notification,
-    restaurant
+    restaurant,
+    ratings
 )
 
-
+# ROUTERS
 from app.api.v1.admin.super_admin import (
     router as super_admin
 )
@@ -45,9 +42,15 @@ from app.api.v1.recommendation_router import (
     router as recommendation_router
 )
 
-from app.api.v1.customer_discovery_router import (
-    router as customer_discovery_router
-)
+# REMOVE THIS IF FILE DOES NOT EXIST
+try:
+    from app.api.v1.customer_discovery_router import (
+        router as customer_discovery_router
+    )
+    customer_discovery_available = True
+except ModuleNotFoundError:
+    customer_discovery_available = False
+
 
 from app.api.v1.cart_router import (
     router as cart_router
@@ -65,17 +68,14 @@ from app.api.v1.payment_method import (
     router as payment_router
 )
 
+from app.api.v1.rating_router import (
+    router as rating_router
+)
 
-
-
+# REDIS
 from app.core.redis_client import (
     connect_redis,
     close_redis
-)
-
-from app.models import (
-    user,
-    order
 )
 
 
@@ -84,22 +84,17 @@ async def lifespan(app: FastAPI):
 
     # CREATE DATABASE TABLES
     async with engine.begin() as conn:
-        await conn.run_sync(
-            Base.metadata.create_all
-        )
+        await conn.run_sync(Base.metadata.create_all)
 
     print("✅ Database Connected")
 
     await connect_redis()
-
     print("✅ Redis Connected")
 
     yield
 
     await close_redis()
-
     print("❌ Redis Disconnected")
-
 
 
 app = FastAPI(
@@ -107,7 +102,7 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-
+# ROUTERS
 app.include_router(
     auth,
     prefix="/api/v1"
@@ -118,27 +113,21 @@ app.include_router(
     prefix="/api/v1"
 )
 
-app.include_router(
-    order_router
-)
-
-app.include_router(
-    food_router
-)
-
-app.include_router(
-    preference_router
-)
+app.include_router(order_router)
+app.include_router(food_router)
+app.include_router(preference_router)
 
 app.include_router(
     recommendation_router,
     prefix="/api/v1"
 )
 
-app.include_router(
-    customer_discovery_router,
-    prefix="/api/v1"
-)
+# INCLUDE ONLY IF FILE EXISTS
+if customer_discovery_available:
+    app.include_router(
+        customer_discovery_router,
+        prefix="/api/v1"
+    )
 
 app.include_router(
     cart_router,
@@ -159,6 +148,12 @@ app.include_router(
     payment_router,
     prefix="/api/v1"
 )
+
+app.include_router(
+    rating_router,
+    prefix="/api/v1"
+)
+
 
 @app.get("/")
 async def root():
