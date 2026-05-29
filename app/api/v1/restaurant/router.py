@@ -81,10 +81,8 @@ def restaurant_onboarding(
     )
 
     db.add(restaurant)
-
-    db.commit()
-
-    db.refresh(restaurant)
+    await db.commit()
+    await db.refresh(user)
 
     return {
         "message": "Restaurant onboarding saved",
