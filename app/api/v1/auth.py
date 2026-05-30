@@ -17,17 +17,18 @@ from app.schemas.auth import (
     TokenResponse,
     VerifyOtpRequest,
 )
-from app.schemas.delivery import (
-    DeliveryAgentRegisterRequest,
-    DeliveryAgentRegisterResponse,
-    MessageResponse,
+from app.schemas.driver import (
+    DriverCreate,
+    DriverLogin,
+    DriverOut,
+    MessageResponse
 )
 from app.schemas.restaurant import (
     RestaurantRegisterRequest,
     RestaurantRegisterResponse,
 )
 from app.services.auth_service import AuthService
-from app.services.delivery_service import DeliveryAgentService
+from app.services.delivery_service import DriverService
 from app.services.restaurant_service import RestaurantService
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
@@ -83,7 +84,7 @@ async def register_restaurant(
     }
 
 
-@router.post("/Delivey-register", response_model=DeliveryAgentRegisterResponse)
+@router.post("/driver-register", response_model=DriverOut)
 async def register_delivery_agent(
     full_name: str = Form(...),
     email: str = Form(...),

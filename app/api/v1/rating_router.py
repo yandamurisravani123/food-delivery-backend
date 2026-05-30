@@ -1,16 +1,16 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
+from typing import List
 
 from app.config.database import get_db
-
-from app.schemas.rating_schema import (
+from app.schemas.ratings_schema import (
     RatingCreate,
-    RatingResponse
+    RatingResponse,
+    MessageResponse
+    
 )
+from app.services.rating_service import RatingService
 
-from app.services.rating_service import (
-    RatingService
-)
 
 router = APIRouter(
     prefix="/ratings",
@@ -19,27 +19,24 @@ router = APIRouter(
 
 
 @router.post(
-    "/submit",
+    "/create",
     response_model=RatingResponse
 )
-async def submit_rating(
+async def create_rating(
     payload: RatingCreate,
     db: AsyncSession = Depends(get_db)
 ):
-
     return await RatingService.create_rating(
         db,
         payload
     )
 
 
-@router.get("/driver/{driver_id}")
-async def get_driver_ratings(
-    driver_id: int,
+@router.get(
+    "/all",
+    response_model=List[RatingResponse]
+)
+async def get_ratings(
     db: AsyncSession = Depends(get_db)
 ):
-
-    return await RatingService.get_driver_ratings(
-        db,
-        driver_id
-    )
+    return await RatingService.get_all_ratings(db)

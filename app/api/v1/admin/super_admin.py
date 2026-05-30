@@ -6,13 +6,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.config.database import get_db
 from app.core.dependencies import get_current_user, require_super_admin
 from app.models.user import User
-from app.schemas.delivery import DeliveryAgentOut, MessageResponse
+from app.schemas.driver import DriverOut, MessageResponse
 from app.schemas.restaurant import (
     RestaurantApprovalResponse,
     RestaurantOut,
     RestaurantRegisterRequest,
 )
-from app.services.delivery_service import DeliveryAgentService
+from app.services.delivery_service import DriverService
 from app.services.restaurant_service import RestaurantService
 
 router = APIRouter(prefix="/Super_admin", tags=["Super Admin"])
@@ -82,7 +82,7 @@ async def get_restaurant_by_id(
         restaurant_id,
     )
 
-@router.get("/pending-delivery", response_model=list[DeliveryAgentOut])
+@router.get("/pending-delivery", response_model=list[DriverOut])
 async def pending_delivery_agents(
     session: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_super_admin),
@@ -127,7 +127,7 @@ async def reject_delivery_agent(
 # DELIVERY AGENTS
 # ==============================
 
-@router.get("/delivery-agents", response_model=list[DeliveryAgentOut])
+@router.get("/delivery-agents", response_model=list[DriverOut])
 async def get_all_delivery_agents(
     session: AsyncSession = Depends(get_db),
     current_user=Depends(require_super_admin),
@@ -135,7 +135,7 @@ async def get_all_delivery_agents(
     return await DeliveryAgentService.get_all_delivery_agents(session)
 
 
-@router.get("/delivery-agents/{delivery_agent_id}", response_model=DeliveryAgentOut)
+@router.get("/delivery-agents/{delivery_agent_id}", response_model=DriverOut)
 async def get_delivery_agent_by_id(
     delivery_agent_id: UUID,
     session: AsyncSession = Depends(get_db),

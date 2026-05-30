@@ -2,6 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from app.models.ratings import Rating
+from app.schemas.rating import RatingCreate
 
 
 class RatingService:
@@ -9,37 +10,30 @@ class RatingService:
     @staticmethod
     async def create_rating(
         db: AsyncSession,
-        data
+        payload: RatingCreate
     ):
 
-        rating = Rating(
-            customer_id=data.customer_id,
-            driver_id=data.driver_id,
-            order_id=data.order_id,
-            rating=data.rating,
-            feedback_tags=",".join(
-                data.feedback_tags
-            ) if data.feedback_tags else None,
-            review=data.review
+        new_rating = Rating(
+            customer_id=payload.customer_id,
+            driver_id=payload.driver_id,
+            order_id=payload.order_id,
+            rating=payload.rating,
+            feedback=payload.feedback,
+            tag=payload.tag
         )
 
-        db.add(rating)
-
+        db.add(new_rating)
         await db.commit()
-        await db.refresh(rating)
+        await db.refresh(new_rating)
 
-        return rating
+        return new_rating
 
     @staticmethod
-    async def get_driver_ratings(
-        db: AsyncSession,
-        driver_id: int
+    async def get_all_ratings(
+        db: AsyncSession
     ):
+        query = select(Rating)
 
-        result = await db.execute(
-            select(Rating).where(
-                Rating.driver_id == driver_id
-            )
-        )
+        result = await db.execute(query)
 
         return result.scalars().all()

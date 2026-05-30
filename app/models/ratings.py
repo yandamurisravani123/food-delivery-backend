@@ -1,11 +1,4 @@
-from sqlalchemy import (
-    Column,
-    Integer,
-    String,
-    ForeignKey,
-    DateTime,
-    Float
-)
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
 from datetime import datetime
 
@@ -19,14 +12,14 @@ class Rating(Base):
 
     customer_id = Column(
         Integer,
-        ForeignKey("customers.id"),
+        ForeignKey("users.id"),
         nullable=False
     )
 
     driver_id = Column(
         Integer,
         ForeignKey("drivers.id"),
-        nullable=False
+        nullable=True
     )
 
     order_id = Column(
@@ -35,20 +28,9 @@ class Rating(Base):
         nullable=False
     )
 
-    rating = Column(
-        Float,
-        nullable=False
-    )
-
-    review = Column(
-        String,
-        nullable=True
-    )
-
-    feedback_tags = Column(
-        String,
-        nullable=True
-    )
+    rating = Column(Integer, nullable=False)
+    feedback = Column(String, nullable=True)
+    tag = Column(String, nullable=True)
 
     created_at = Column(
         DateTime,
@@ -56,6 +38,8 @@ class Rating(Base):
     )
 
     # Relationships
-    customer = relationship("Customer")
-    driver = relationship("Driver")
+    customer = relationship("User")
     order = relationship("Order")
+
+    # Only keep if Driver model exists
+    driver = relationship("Driver")

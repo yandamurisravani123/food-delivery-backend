@@ -1,15 +1,14 @@
 from pydantic import BaseModel
-from typing import Optional, List
-from datetime import datetime
+from typing import Optional
 
 
 class RatingCreate(BaseModel):
     customer_id: int
     driver_id: int
     order_id: int
-    rating: float
-    feedback_tags: Optional[List[str]] = []
-    review: Optional[str] = None
+    rating: int
+    feedback: Optional[str] = None
+    tag: Optional[str] = None
 
 
 class RatingResponse(BaseModel):
@@ -17,10 +16,9 @@ class RatingResponse(BaseModel):
     customer_id: int
     driver_id: int
     order_id: int
-    rating: float
-    feedback_tags: Optional[str]
-    review: Optional[str]
-    created_at: datetime
+    rating: int
+    feedback: Optional[str]
+    tag: Optional[str]
 
     class Config:
         from_attributes = True

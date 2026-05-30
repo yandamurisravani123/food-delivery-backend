@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
 
 from app.config.database import get_db
-from app.schemas.rating_schema import (
+from app.schemas.ratings_schema import (
     RatingCreate,
     RatingResponse
 )

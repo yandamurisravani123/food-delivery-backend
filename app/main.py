@@ -6,7 +6,6 @@ from app.config.database import engine, Base
 # MODELS
 # Import all models
 from app.models.user import User
-from app.models.driver import Driver
 from app.models.restaurant import Restaurant
 from app.models.food import Food
 from app.models.order import Order
@@ -40,9 +39,7 @@ from app.api.v1.recommendation_router import (
 
 # REMOVE THIS IF FILE DOES NOT EXIST
 try:
-    from app.api.v1.customer_discovery_router import (
-        router as customer_discovery_router
-    )
+    
     customer_discovery_available = True
 except ModuleNotFoundError:
     customer_discovery_available = False
