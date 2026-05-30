@@ -1,6 +1,9 @@
 from pydantic import BaseModel, Field
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> smart-bidding-feature
 class RestaurantBankRequest(BaseModel):
 
     restaurant_id: str

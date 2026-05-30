@@ -1,7 +1,10 @@
 from typing import Optional
 from pydantic import BaseModel
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> smart-bidding-feature
 class RestaurantOnboardingRequest(BaseModel):
 
     restaurant_name: str

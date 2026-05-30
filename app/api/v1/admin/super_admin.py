@@ -7,11 +7,16 @@ from app.config.database import get_db
 from app.core.dependencies import get_current_user, require_super_admin
 from app.models.user import User
 from app.schemas.delivery import DeliveryAgentOut, MessageResponse
+<<<<<<< HEAD
 from app.schemas.restaurant import (
     RestaurantApprovalResponse,
     RestaurantOut,
     RestaurantRegisterRequest,
 )
+=======
+from app.schemas.restaurant import RestaurantApprovalResponse,RestaurantOut,RestaurantRegisterRequest
+
+>>>>>>> smart-bidding-feature
 from app.services.delivery_service import DeliveryAgentService
 from app.services.restaurant_service import RestaurantService
 

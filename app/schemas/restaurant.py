@@ -66,3 +66,68 @@ class RestaurantRegisterResponse(BaseModel):
     message: str
     restaurant_id: UUID
     status: str
+<<<<<<< HEAD
+=======
+
+from pydantic import BaseModel
+from datetime import datetime
+
+from pydantic import BaseModel, ConfigDict
+from uuid import UUID
+from datetime import datetime
+
+
+class IngredientCreate(BaseModel):
+
+    restaurant_id: UUID
+    ingredient_name: str
+    category: str
+    stock_units: float
+    unit: str
+    min_threshold: float
+    current_price: float
+
+
+class IngredientPriceUpdate(BaseModel):
+
+    current_price: float
+
+
+class WasteCreate(BaseModel):
+
+    units_spoiled: int
+    reason: str
+    loss_amount: float
+
+
+class WasteOut(BaseModel):
+
+    id: UUID
+    units_spoiled: int
+    reason: str
+    loss_amount: float
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class IngredientOut(BaseModel):
+
+    id: UUID
+    restaurant_id: UUID
+    ingredient_name: str
+    category: str
+    stock_units: float
+    unit: str
+    min_threshold: float
+    current_price: float
+    last_price: float | None = None
+    price_change: float | None = None
+    is_out_of_stock: bool
+    minimum_stock: float
+    is_low_stock: bool
+
+    # waste_logs: list[WasteOut] = []
+
+    model_config = ConfigDict(from_attributes=True)
+>>>>>>> smart-bidding-feature
