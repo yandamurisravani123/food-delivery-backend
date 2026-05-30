@@ -4,19 +4,15 @@ from contextlib import asynccontextmanager
 from app.config.database import engine, Base
 
 # MODELS
-from app.models import (
-    payment_method,
-    user,
-    order,
-    food,
-    user_preference,
-    cart,
-    order_tracking,
-    delivery_notification,
-    restaurant,
-    ratings
-)
-
+# Import all models
+from app.models.user import User
+from app.models.driver import Driver
+from app.models.restaurant import Restaurant
+from app.models.food import Food
+from app.models.order import Order
+from app.models.ratings import Rating
+from app.models.cart import Cart
+from app.models.payment_method import PaymentMethod
 # ROUTERS
 from app.api.v1.admin.super_admin import (
     router as super_admin
