@@ -8,7 +8,7 @@ from app.config.database import get_db
 from app.models.order import Order
 from app.models.food import Food
 from app.models.user_preference import UserPreference
-
+from uuid import UUID
 
 router = APIRouter(
     prefix="/recommendations",
@@ -18,7 +18,7 @@ router = APIRouter(
 
 @router.get("/{user_id}")
 async def ai_recommendations(
-    user_id: int,
+    user_id: UUID,
     db: AsyncSession = Depends(get_db)
 ):
 

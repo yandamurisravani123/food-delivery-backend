@@ -1,41 +1,25 @@
-from sqlalchemy.ext.asyncio import (
-    AsyncSession
-)
+import uuid
 
-from app.repositories.payment_repository import (
-    PaymentRepository
-)
+from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
 
+from app.config.database import AsyncSessionLocal
+from app.schemas.payment import PaymentRequest
 
 class PaymentService:
 
     @staticmethod
-    async def cash_on_delivery(
-        db: AsyncSession,
-        payload
-    ):
+    async def create_payment(payload: PaymentRequest):
 
-        payment_data = {
+        payment_method = payload.payment_method.upper()
 
-            "order_id": payload.order_id,
-
-            "user_id": payload.user_id,
-
-            "payment_method": "COD",
-
-            "payment_status": "Pending",
-
-            "amount": payload.amount
-        }
-
-        payment = await PaymentRepository.create_payment(
-            db,
-            payment_data
-        )
+        if payment_method not in ["CASH", "UPI", "CARD"]:
+            return {
+                "success": False,
+                "message": "Invalid payment method"
+            }
 
         return {
-
-            "message": "Cash On Delivery Order Placed Successfully",
-
-            "payment": payment
+            "success": True,
+            "message": "Payment successful"
         }

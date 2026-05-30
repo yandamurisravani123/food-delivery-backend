@@ -16,7 +16,7 @@ class InvoiceItemCreate(BaseModel):
 
 class InvoiceCreate(BaseModel):
 
-    order_id: str
+    order_id: int
 
     restaurant_name: str
 

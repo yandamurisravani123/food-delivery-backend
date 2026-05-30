@@ -1,8 +1,8 @@
 from pydantic import BaseModel
-
+from uuid import UUID
 
 class OrderCreate(BaseModel):
-    user_id: int
+    user_id: UUID
     food_name: str
     cuisine: str
     order_time: str
@@ -10,7 +10,7 @@ class OrderCreate(BaseModel):
 
 class OrderResponse(BaseModel):
     id: int
-    user_id: int
+    user_id: UUID
     food_name: str
     cuisine: str
     order_time: str

@@ -3,17 +3,22 @@ from sqlalchemy import (
     Integer,
     String
 )
-
+from sqlalchemy.dialects.postgresql import UUID
 from app.config.database import Base
-
+from sqlalchemy.orm import mapped_column
 
 class Order(Base):
 
     __tablename__ = "orders"
 
-    id = Column(Integer, primary_key=True)
+    id = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=UUID.UUID4,
+        index=True,
+    )
 
-    user_id = Column(Integer)
+    user_id = Column(UUID(as_uuid=True), nullable=False)
 
     food_name = Column(String)
 

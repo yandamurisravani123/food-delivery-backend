@@ -63,3 +63,5 @@ async def top_rated_restaurants(
         CustomerDiscoveryService
         .top_rated(db)
     )
+
+

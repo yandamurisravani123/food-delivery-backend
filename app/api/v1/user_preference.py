@@ -11,6 +11,8 @@ from app.schemas.user_preference import (
     PreferenceUpdate
 )
 
+from uuid import UUID
+
 
 router = APIRouter(
     prefix="/preferences",
@@ -62,7 +64,7 @@ async def get_all_preferences(
 # GET USER PREFERENCE
 @router.get("/{user_id}")
 async def get_user_preference(
-    user_id: int,
+    user_id: UUID,
     db: AsyncSession = Depends(get_db)
 ):
 
@@ -84,16 +86,16 @@ async def get_user_preference(
 
 
 # UPDATE PREFERENCE
-@router.put("/{id}")
+@router.put("/{preference_id}")
 async def update_preference(
-    id: int,
-    payload: PreferenceUpdate,
+    preference_id: UUID,
+    preference: PreferenceUpdate,
     db: AsyncSession = Depends(get_db)
 ):
 
     result = await db.execute(
         select(UserPreference).where(
-            UserPreference.id == id
+            UserPreference.id == preference_id
         )
     )
 
@@ -120,18 +122,17 @@ async def update_preference(
 
 
 # DELETE PREFERENCE
-@router.delete("/{id}")
+@router.delete("/{user_id}")
 async def delete_preference(
-    id: int,
+    user_id: UUID,
     db: AsyncSession = Depends(get_db)
 ):
 
     result = await db.execute(
-        select(UserPreference).where(
-            UserPreference.id == id
-        )
+    select(UserPreference).where(
+        UserPreference.id == preference_id
     )
-
+)
     preference = result.scalar()
 
     if not preference:
