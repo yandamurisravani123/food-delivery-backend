@@ -72,6 +72,8 @@ from app.api.v1.restaurant_router import (
 from app.api.v1.payment_router import (
     router as payment_router
 )
+from app.api.v1.wallet_router import router as wallet_router
+from app.api.v1.refund_router import router as refund_router
 
 # =====================================================
 # REDIS
@@ -180,6 +182,15 @@ app.include_router(
     prefix="/api/v1"
 )
 
+app.include_router(
+    wallet_router,
+    prefix="/api/v1"
+)
+
+app.include_router(
+    refund_router,
+    prefix="/api/v1"
+)
 # =====================================================
 # ROOT API
 
