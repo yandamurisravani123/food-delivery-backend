@@ -1,27 +1,27 @@
 from fastapi import FastAPI
+from uuid import UUID
 
-# =========================
 # Database
-# =========================
+
 
 from app.config.database import (
     engine,
-    Base
+    Base,
+    get_db
 )
 
-# =========================
+
 # Redis
-# =========================
+
 
 from app.core.redis_client import (
     connect_redis,
     close_redis
 )
 
-# =========================
+
 # Models
-# =========================
-# IMPORTANT:
+
 # Use direct imports to avoid circular import issues
 
 import app.models.user
@@ -36,9 +36,9 @@ import app.models.offer
 import app.models.menu
 import app.models.review
 
-# =========================
+
 # NEW MODELS
-# =========================
+
 
 import app.models.menu_item
 import app.models.extra
@@ -48,25 +48,25 @@ import app.models.cart_extra
 import app.models.cart_preference
 import app.models.special_instruction
 
-# =========================
+
 # Auth Routers
-# =========================
+
 
 from app.api.v1.auth import (
     router as auth_router
 )
 
-# =========================
+
 # Admin Routers
-# =========================
+
 
 from app.api.v1.admin.super_admin import (
     router as super_admin_router
 )
 
-# =========================
+
 # Customer Routers
-# =========================
+
 
 from app.api.v1.customer.home import (
     router as home_router
@@ -104,9 +104,9 @@ from app.api.v1.customer.filter import (
     router as filter_router
 )
 
-# =========================
+
 # NEW CUSTOMIZATION ROUTERS
-# =========================
+
 
 from app.api.v1.customer.customization import (
     router as customization_router
@@ -128,18 +128,18 @@ from app.api.v1.customer.checkout import (
     router as checkout_router
 )
 
-# =========================
+
 # FastAPI App
-# =========================
+
 
 app = FastAPI(
     title="Food Delivery Backend",
     version="1.0.0"
 )
 
-# =========================
+
 # Include Routers
-# =========================
+
 
 # Auth
 app.include_router(
@@ -156,7 +156,8 @@ app.include_router(
 # Home
 app.include_router(
     home_router,
-    prefix="/api/v1"
+    prefix="/api/v1",
+    tags=["Home"]
 )
 
 # Search
@@ -207,9 +208,9 @@ app.include_router(
     prefix="/api/v1"
 )
 
-# =========================
+
 # CUSTOMIZATION ROUTERS
-# =========================
+
 
 # Customization
 app.include_router(
@@ -246,9 +247,9 @@ app.include_router(
     tags=["Checkout"]
 )
 
-# =========================
+
 # Startup Event
-# =========================
+
 
 @app.on_event("startup")
 async def startup():
@@ -269,9 +270,9 @@ async def startup():
 
     print("✅ Redis Connected")
 
-# =========================
+
 # Shutdown Event
-# =========================
+
 
 @app.on_event("shutdown")
 async def shutdown():
@@ -283,9 +284,91 @@ async def shutdown():
 
     print("✅ Redis Connection Closed")
 
-# =========================
+    # ------------------------------------------------------------------------------------------
+from fastapi import Depends
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
+
+from app.config.database import get_db
+from app.models.restaurant import Restaurant
+
+
+from fastapi import APIRouter, Depends
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
+from uuid import UUID
+
+from app.config.database import get_db
+from app.models.restaurant import Restaurant
+
+router = APIRouter()
+
+
+@router.get("/customer/restaurant/{restaurant_id}")
+async def get_restaurant(
+    restaurant_id: UUID,
+    db: AsyncSession = Depends(get_db)
+):
+
+    try:
+
+        result = await db.execute(
+            select(Restaurant).where(
+                Restaurant.id == restaurant_id
+            )
+        )
+
+        restaurant = result.scalar_one_or_none()
+
+        if restaurant:
+
+            return {
+                "restaurant_id": restaurant.id,
+                "restaurant_name": restaurant.restaurant_name,
+                "city": restaurant.city,
+                "state": restaurant.state
+            }
+
+        return {
+            "message": "Restaurant not found"
+        }
+
+    except Exception as e:
+
+        return {
+            "error": str(e)
+        }
+
+
+from fastapi import FastAPI
+
+from app.api.v1.customer.review import (
+    router as review_router
+)
+
+# Include Review Router
+
+
+app.include_router(
+    review_router,
+    prefix="/api/v1/customer",
+    tags=["Reviews"]
+)
+
+
+# Premium Membership
+from app.api.v1.customer.premium import (
+    router as premium_router
+)
+
+app.include_router(
+    premium_router
+)
+
+
+
 # Root Endpoint
-# =========================
+
 
 @app.get("/")
 async def root():

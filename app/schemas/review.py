@@ -1,11 +1,20 @@
+# =========================================================
+# app/schemas/review_schema.py
+# =========================================================
+
 from pydantic import BaseModel
 
 
-class ReviewResponse(BaseModel):
+class RestaurantReviewRequest(BaseModel):
 
-    id: int
+    order_id: str
+
+    restaurant_id: str
+
     user_name: str
+
     comment: str
+
     rating: float
 
     class Config:

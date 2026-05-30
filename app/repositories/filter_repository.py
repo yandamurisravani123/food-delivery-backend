@@ -32,4 +32,17 @@ class FilterRepository:
 
         result = await session.execute(query)
 
-        return result.scalars().all()
+        restaurants = result.scalars().all()
+
+        return [
+
+            {
+                "id": str(r.id),
+                "restaurant_name": r.restaurant_name,
+                "cuisine_types": r.cuisine_types,
+                "rating": r.rating,
+                "city": r.city
+            }
+
+            for r in restaurants
+        ]

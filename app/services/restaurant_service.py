@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config.security import hash_password
 
+from app.models import restaurant
 from app.repositories.restaurant_repository import (
     RestaurantRepository
 )
@@ -12,6 +13,11 @@ from app.repositories.restaurant_repository import (
 from app.schemas.restaurant_schema import (
     RestaurantRegisterRequest
 )
+
+from app.repositories.menu_repository import (
+    MenuRepository
+)
+
 
 from app.utils.email_utils import (
     send_restaurant_approval_email,
@@ -21,9 +27,9 @@ from app.utils.email_utils import (
 
 class RestaurantService:
 
-    # ==========================================
+
     # Register Restaurant
-    # ==========================================
+
 
     @staticmethod
     async def register_restaurant(
@@ -68,21 +74,16 @@ class RestaurantService:
 
         data["is_active"] = False
 
-        # Create Restaurant
+       # Create Restaurant
         restaurant = await RestaurantRepository.create_restaurant(
-            session,
-            data
-        )
+        session,
+        data
+       )
 
-        return {
-            "success": True,
-            "message": "Restaurant registered successfully",
-            "data": restaurant
-        }
+        return restaurant
 
-    # ==========================================
     # Approve Restaurant
-    # ==========================================
+  
 
     @staticmethod
     async def approve_restaurant(
@@ -133,9 +134,9 @@ class RestaurantService:
             "data": approved_restaurant
         }
 
-    # ==========================================
+   
     # Reject Restaurant
-    # ==========================================
+  
 
     @staticmethod
     async def reject_restaurant(
@@ -186,9 +187,8 @@ class RestaurantService:
             "data": rejected_restaurant
         }
 
-    # ==========================================
     # Get Pending Restaurants
-    # ==========================================
+
 
     @staticmethod
     async def get_pending_restaurants(
@@ -205,9 +205,9 @@ class RestaurantService:
             "data": restaurants
         }
 
-    # ==========================================
+    
     # Get All Restaurants
-    # ==========================================
+
 
     @staticmethod
     async def get_all(
@@ -224,9 +224,9 @@ class RestaurantService:
             "data": restaurants
         }
 
-    # ==========================================
+   
     # Get Restaurant By ID
-    # ==========================================
+
 
     @staticmethod
     async def get_by_id(
@@ -252,9 +252,9 @@ class RestaurantService:
             "data": restaurant
         }
 
-    # ==========================================
+
     # Nearby Restaurants
-    # ==========================================
+  
 
     @staticmethod
     async def nearby_restaurants(
@@ -271,30 +271,29 @@ class RestaurantService:
             "data": restaurants
         }
 
-    # ==========================================
     # Restaurant Menu
-    # ==========================================
+   
 
-    @staticmethod
-    async def restaurant_menu(
-        session: AsyncSession,
-        restaurant_id: UUID
-    ):
+    # Restaurant Menu
 
-        menu = await RestaurantRepository.get_restaurant_menu(
-            session,
-            restaurant_id
-        )
+@staticmethod
+async def restaurant_menu(
+    session: AsyncSession,
+    restaurant_id: UUID
+):
 
-        return {
-            "success": True,
-            "message": "Restaurant menu fetched successfully",
-            "data": menu
-        }
+    menu = await MenuRepository.get_restaurant_menu(
+        session,
+        restaurant_id
+    )
 
-    # ==========================================
+    return {
+        "success": True,
+        "message": "Restaurant menu fetched successfully",
+        "data": menu
+    }
     # Restaurant Reviews
-    # ==========================================
+  
 
     @staticmethod
     async def restaurant_reviews(
