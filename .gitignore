@@ -1,0 +1,60 @@
+# Virtual Environment
+venv/
+env/
+.venv/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Distribution / Packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Environment Variables
+.env
+.env.*
+
+# IDEs
+.vscode/
+.idea/
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Pytest
+.pytest_cache/
+.coverage
+htmlcov/
+
+# MyPy
+.mypy_cache/
+
+# Ruff
+.ruff_cache/
+
+# SQLite
+*.db
+*.sqlite3
+
+# FastAPI Uploads (if applicable)
+uploads/
+
+# Alembic
+alembic/versions/__pycache__/
+
+# Secrets
+secrets.json
+credentials.json
+
+# Temporary files
+*.tmp
+*.bak
