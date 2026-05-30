@@ -5,14 +5,14 @@ from sqlalchemy import select
 from app.models.food import Food
 from app.models.order import Order
 from app.models.user_preference import UserPreference
-
+from uuid import UUID
 
 # =====================================================
 # GENERATE AI RECOMMENDATIONS
 # =====================================================
 
 async def generate_recommendations(
-    user_id: int,
+    user_id: UUID,
     db
 ):
 
