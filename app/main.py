@@ -365,6 +365,15 @@ app.include_router(
     premium_router
 )
 
+from app.api.v1.customer.tracking import (
+    router as tracking_router
+)
+
+app.include_router(
+    tracking_router
+)
+
+
 
 
 # Root Endpoint
