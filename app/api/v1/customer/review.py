@@ -88,3 +88,18 @@ async def check_review_status(
         db,
         order_id
     )
+
+
+class RestaurantRepository:
+
+    
+    # Get Restaurant Reviews
+    
+
+    @staticmethod
+    async def get_restaurant_reviews(
+        session,
+        restaurant_id
+    ):
+
+        return []

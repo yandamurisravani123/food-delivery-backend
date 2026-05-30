@@ -6,13 +6,13 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.restaurant import Restaurant
-
+# from sqlalchemy.ext.asyncio import AsyncSession
 
 class RestaurantRepository:
 
-    # ==========================================
+
     # Create Restaurant
-    # ==========================================
+
 
     @staticmethod
     async def create_restaurant(
@@ -30,9 +30,9 @@ class RestaurantRepository:
 
         return restaurant
 
-    # ==========================================
+
     # Get Restaurant By ID
-    # ==========================================
+
 
     @staticmethod
     async def get_by_id(
@@ -48,9 +48,9 @@ class RestaurantRepository:
 
         return result.scalar_one_or_none()
 
-    # ==========================================
+
     # Get Restaurant By Owner Email
-    # ==========================================
+
 
     @staticmethod
     async def get_by_owner_email(
@@ -66,9 +66,9 @@ class RestaurantRepository:
 
         return result.scalar_one_or_none()
 
-    # ==========================================
+
     # Get All Restaurants
-    # ==========================================
+
 
     @staticmethod
     async def get_all(
@@ -81,9 +81,9 @@ class RestaurantRepository:
 
         return result.scalars().all()
 
-    # ==========================================
+
     # Get Pending Restaurants
-    # ==========================================
+
 
     @staticmethod
     async def list_pending(
@@ -98,9 +98,9 @@ class RestaurantRepository:
 
         return result.scalars().all()
 
-    # ==========================================
+    
     # Approve Restaurant
-    # ==========================================
+
 
     @staticmethod
     async def approve_restaurant(
@@ -127,9 +127,8 @@ class RestaurantRepository:
 
         return restaurant
 
-    # ==========================================
     # Reject Restaurant
-    # ==========================================
+
 
     @staticmethod
     async def reject_restaurant(
@@ -150,9 +149,32 @@ class RestaurantRepository:
 
         return restaurant
 
-    # ==========================================
     # Helper - Get Restaurant Or Raise
+
+from sqlalchemy import select
+
+from app.models.review import Review
+
+
+class RestaurantRepository:
+
     # ==========================================
+    # Get Restaurant Reviews
+    # ==========================================
+
+    @staticmethod
+    async def get_restaurant_reviews(
+        session,
+        restaurant_id
+    ):
+
+        result = await session.execute(
+            select(Review).where(
+                Review.restaurant_id == restaurant_id
+            )
+        )
+
+        return result.scalars().all()
 
     @staticmethod
     async def get_restaurant_by_id(

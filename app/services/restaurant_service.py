@@ -274,26 +274,30 @@ class RestaurantService:
     # Restaurant Menu
    
 
+        # ==========================================
     # Restaurant Menu
+    # ==========================================
 
-@staticmethod
-async def restaurant_menu(
-    session: AsyncSession,
-    restaurant_id: UUID
-):
+    @staticmethod
+    async def restaurant_menu(
+        session: AsyncSession,
+        restaurant_id: UUID
+    ):
 
-    menu = await MenuRepository.get_restaurant_menu(
-        session,
-        restaurant_id
-    )
+        menu = await MenuRepository.get_restaurant_menu(
+            session,
+            restaurant_id
+        )
 
-    return {
-        "success": True,
-        "message": "Restaurant menu fetched successfully",
-        "data": menu
-    }
+        return {
+            "success": True,
+            "message": "Restaurant menu fetched successfully",
+            "data": menu
+        }
+
+    # ==========================================
     # Restaurant Reviews
-  
+    # ==========================================
 
     @staticmethod
     async def restaurant_reviews(
