@@ -67,6 +67,7 @@ class RestaurantRegisterResponse(BaseModel):
     restaurant_id: UUID
     status: str
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 
 from pydantic import BaseModel
@@ -79,6 +80,16 @@ from datetime import datetime
 
 class IngredientCreate(BaseModel):
 
+=======
+
+
+ 
+ 
+
+from datetime import datetime
+class IngredientCreate(BaseModel):
+ 
+>>>>>>> 6da5f03 (testing)
     restaurant_id: UUID
     ingredient_name: str
     category: str
@@ -86,6 +97,7 @@ class IngredientCreate(BaseModel):
     unit: str
     min_threshold: float
     current_price: float
+<<<<<<< HEAD
 
 
 class IngredientPriceUpdate(BaseModel):
@@ -102,17 +114,44 @@ class WasteCreate(BaseModel):
 
 class WasteOut(BaseModel):
 
+=======
+ 
+ 
+class IngredientPriceUpdate(BaseModel):
+ 
+    current_price: float
+ 
+ 
+class WasteCreate(BaseModel):
+ 
+    units_spoiled: int
+    reason: str
+    loss_amount: float
+ 
+ 
+class WasteOut(BaseModel):
+ 
+>>>>>>> 6da5f03 (testing)
     id: UUID
     units_spoiled: int
     reason: str
     loss_amount: float
     created_at: datetime
+<<<<<<< HEAD
 
     model_config = ConfigDict(from_attributes=True)
 
 
 class IngredientOut(BaseModel):
 
+=======
+ 
+    model_config = ConfigDict(from_attributes=True)
+ 
+ 
+class IngredientOut(BaseModel):
+ 
+>>>>>>> 6da5f03 (testing)
     id: UUID
     restaurant_id: UUID
     ingredient_name: str
@@ -126,8 +165,16 @@ class IngredientOut(BaseModel):
     is_out_of_stock: bool
     minimum_stock: float
     is_low_stock: bool
+<<<<<<< HEAD
 
     # waste_logs: list[WasteOut] = []
 
     model_config = ConfigDict(from_attributes=True)
 >>>>>>> smart-bidding-feature
+=======
+ 
+    # waste_logs: list[WasteOut] = []
+ 
+    model_config = ConfigDict(from_attributes=True)
+ 
+>>>>>>> 6da5f03 (testing)

@@ -1,7 +1,8 @@
 <<<<<<< HEAD
 import uuid
-from sqlalchemy import Column, String, Boolean, DateTime, ForeignKey, Float, func
-from sqlalchemy.orm import mapped_column
+from sqlalchemy import Column, String, Boolean, DateTime, ForeignKey, Float, func,Integer,Text
+from sqlalchemy.orm import mapped_column,relationship
+from datetime import datetime
 from sqlalchemy.dialects.postgresql import UUID
 from app.config.database import Base
 
@@ -329,9 +330,13 @@ class Restaurant(Base):
     gst_certificate = Column(String(255), nullable=True)
     fssai_license_file = Column(String(255), nullable=True)
     cancelled_cheque = Column(String(255), nullable=True)
+    
+    
+    orders = relationship("Order", back_populates="restaurant")
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+<<<<<<< HEAD
 =======
     pincode = Column(String(255), nullable=False)
     latitude = Column(Float, nullable=True)
@@ -359,6 +364,17 @@ class Restaurant(Base):
 class Ingredient(Base):
     __tablename__ = "ingredients"
 
+=======
+    
+    
+   
+
+
+ 
+class Ingredient(Base):
+    __tablename__ = "ingredients"
+ 
+>>>>>>> 6da5f03 (testing)
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     restaurant_id = Column(UUID(as_uuid=True), nullable=False)
     ingredient_name = Column(String)
@@ -373,6 +389,7 @@ class Ingredient(Base):
     minimum_stock = Column(Float, default=10)
     is_low_stock = Column(Boolean, default=False)
     last_updated = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+<<<<<<< HEAD
 
     waste_logs = relationship("IngredientWaste", back_populates="ingredient")
 
@@ -382,10 +399,22 @@ class IngredientWaste(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)  # ← UUID not Integer
     ingredient_id = Column(UUID(as_uuid=True), ForeignKey("ingredients.id"))  # ← UUID not Integer
+=======
+ 
+    waste_logs = relationship("IngredientWaste", back_populates="ingredient")
+ 
+ 
+class IngredientWaste(Base):
+    __tablename__ = "ingredient_waste"
+ 
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)  
+    ingredient_id = Column(UUID(as_uuid=True), ForeignKey("ingredients.id"))
+>>>>>>> 6da5f03 (testing)
     units_spoiled = Column(Integer)
     reason = Column(Text)
     loss_amount = Column(Float)
     created_at = Column(DateTime, default=datetime.utcnow)
+<<<<<<< HEAD
 
     ingredient = relationship("Ingredient", back_populates="waste_logs")
 
@@ -393,15 +422,32 @@ class IngredientWaste(Base):
 class MenuIngredient(Base):
     __tablename__ = "menu_ingredients"
 
+=======
+ 
+    ingredient = relationship("Ingredient", back_populates="waste_logs")
+ 
+ 
+class MenuIngredient(Base):
+    __tablename__ = "menu_ingredients"
+ 
+>>>>>>> 6da5f03 (testing)
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     menu_item_id = Column(UUID(as_uuid=True), ForeignKey("menu_items.id"))
     ingredient_id = Column(UUID(as_uuid=True), ForeignKey("ingredients.id"))
     quantity_required = Column(Float)
+<<<<<<< HEAD
 
 
 class InventoryAdjustment(Base):
     __tablename__ = "inventory_adjustments"
 
+=======
+ 
+ 
+class InventoryAdjustment(Base):
+    __tablename__ = "inventory_adjustments"
+ 
+>>>>>>> 6da5f03 (testing)
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     ingredient_id = Column(UUID(as_uuid=True))
     ingredient_name = Column(String)
@@ -410,11 +456,19 @@ class InventoryAdjustment(Base):
     reason = Column(String)
     updated_by = Column(String)
     created_at = Column(DateTime, default=datetime.utcnow)
+<<<<<<< HEAD
 
 
 class InventoryAlert(Base):
     __tablename__ = "inventory_alerts"
 
+=======
+ 
+ 
+class InventoryAlert(Base):
+    __tablename__ = "inventory_alerts"
+ 
+>>>>>>> 6da5f03 (testing)
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     restaurant_id = Column(UUID(as_uuid=True), ForeignKey("restaurants.id"))
     ingredient_id = Column(UUID(as_uuid=True), ForeignKey("ingredients.id"))
@@ -423,4 +477,9 @@ class InventoryAlert(Base):
     current_stock = Column(Float)
     threshold_value = Column(Float)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+<<<<<<< HEAD
 >>>>>>> smart-bidding-feature
+=======
+  
+    
+>>>>>>> 6da5f03 (testing)

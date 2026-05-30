@@ -1,7 +1,7 @@
 import uuid
 
 from sqlalchemy import UUID, Column, Integer, String, Boolean, DateTime, func
-from sqlalchemy.orm import mapped_column
+from sqlalchemy.orm import mapped_column, relationship
 from app.config.database import Base
 
 class User(Base):
@@ -25,3 +25,9 @@ class User(Base):
     is_verified = Column(Boolean, default=False)
     is_super_admin = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+    
+    
+    orders = relationship(
+        "Order",
+        back_populates="user"
+    )

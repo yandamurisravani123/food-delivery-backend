@@ -1,6 +1,7 @@
 <<<<<<< HEAD
 from sqlalchemy import Column, String, Float, Boolean, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship
 from app.config.database import Base
 import uuid
 
@@ -43,6 +44,7 @@ class MenuItem(Base):
     track_stock = Column(Boolean, default=True)
     
     tax_category = Column(String(100), nullable=True)
+<<<<<<< HEAD
 =======
 import uuid
 from sqlalchemy import Column, String, Boolean, DateTime, Integer
@@ -71,3 +73,12 @@ class MenuItem(Base):
     zomato_synced = Column(Boolean, default=False)
     last_synced_at = Column(DateTime, nullable=True)
 >>>>>>> smart-bidding-feature
+=======
+    
+    
+    # RELATIONSHIP
+    order_items = relationship(
+        "OrderItems",
+        back_populates="menu_item"
+    )
+>>>>>>> 6da5f03 (testing)

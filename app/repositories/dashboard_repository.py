@@ -1,12 +1,21 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
+<<<<<<< HEAD
 
 from app.models.order import Order
 
 
 class DashboardRepository:
 
+=======
+ 
+from app.models.order import Order
+ 
+ 
+class DashboardRepository:
+ 
+>>>>>>> 6da5f03 (testing)
     @staticmethod
     def get_total_orders(
         db: Session,
@@ -17,13 +26,21 @@ class DashboardRepository:
             .filter(Order.restaurant_id == restaurant_id)
             .count()
         )
+<<<<<<< HEAD
 
+=======
+ 
+>>>>>>> 6da5f03 (testing)
     @staticmethod
     async def get_orders_by_time(
         session: AsyncSession,
         restaurant_id
     ):
+<<<<<<< HEAD
 
+=======
+ 
+>>>>>>> 6da5f03 (testing)
         query = (
             select(
                 func.extract("dow", Order.created_at).label("day"),
@@ -33,17 +50,29 @@ class DashboardRepository:
             .where(Order.restaurant_id == restaurant_id)
             .group_by("day", "hour")
         )
+<<<<<<< HEAD
 
         result = await session.execute(query)
 
         return result.all()
 
+=======
+ 
+        result = await session.execute(query)
+ 
+        return result.all()
+ 
+>>>>>>> 6da5f03 (testing)
     @staticmethod
     async def get_peak_hour_orders(
         session: AsyncSession,
         restaurant_id
     ):
+<<<<<<< HEAD
 
+=======
+ 
+>>>>>>> 6da5f03 (testing)
         query = (
             select(
                 func.extract("hour", Order.created_at).label("hour"),
@@ -54,6 +83,7 @@ class DashboardRepository:
             .order_by(func.count(Order.id).desc())
             .limit(1)
         )
+<<<<<<< HEAD
 
         result = await session.execute(query)
 
@@ -63,6 +93,17 @@ class DashboardRepository:
     # Dashboard APIs
     # -----------------------------
 
+=======
+ 
+        result = await session.execute(query)
+ 
+        return result.first()
+ 
+    # -----------------------------
+    # Dashboard APIs
+    # -----------------------------
+ 
+>>>>>>> 6da5f03 (testing)
     @staticmethod
     async def get_growth_metrics(
         session: AsyncSession,
@@ -73,7 +114,11 @@ class DashboardRepository:
             "target": 0,
             "monthly_growth": 0
         }
+<<<<<<< HEAD
 
+=======
+ 
+>>>>>>> 6da5f03 (testing)
     @staticmethod
     async def get_repeat_orders(
         session: AsyncSession,
@@ -84,7 +129,11 @@ class DashboardRepository:
             "monthly_growth": 0,
             "top_percentile": 0
         }
+<<<<<<< HEAD
 
+=======
+ 
+>>>>>>> 6da5f03 (testing)
     @staticmethod
     async def get_market_reach(
         session: AsyncSession,
@@ -94,14 +143,22 @@ class DashboardRepository:
             "market_share": 0,
             "growth": 0
         }
+<<<<<<< HEAD
 
+=======
+ 
+>>>>>>> 6da5f03 (testing)
     @staticmethod
     async def get_rating_trend(
         session: AsyncSession,
         restaurant_id
     ):
         return []
+<<<<<<< HEAD
 
+=======
+ 
+>>>>>>> 6da5f03 (testing)
     @staticmethod
     async def get_competitor_benchmark(
         session: AsyncSession,
@@ -112,7 +169,11 @@ class DashboardRepository:
             "accuracy": "0%",
             "customer_price_index": "N/A"
         }
+<<<<<<< HEAD
 
+=======
+ 
+>>>>>>> 6da5f03 (testing)
     @staticmethod
     async def get_marketing_impact(
         session: AsyncSession,
@@ -122,7 +183,11 @@ class DashboardRepository:
             "referral_growth": 0,
             "campaign_status": "Inactive"
         }
+<<<<<<< HEAD
 
+=======
+ 
+>>>>>>> 6da5f03 (testing)
     @staticmethod
     async def get_stock_efficiency(
         session: AsyncSession,
@@ -132,7 +197,11 @@ class DashboardRepository:
             "wastage_reduction": 0,
             "prediction_accuracy": 0
         }
+<<<<<<< HEAD
 
+=======
+ 
+>>>>>>> 6da5f03 (testing)
     @staticmethod
     async def get_staff_performance(
         session: AsyncSession,
@@ -142,9 +211,15 @@ class DashboardRepository:
             "shift_rating": 0,
             "peak_hour": "N/A"
         }
+<<<<<<< HEAD
     
     
 
+=======
+   
+   
+ 
+>>>>>>> 6da5f03 (testing)
     @staticmethod
     async def get_prep_analysis(
         session: AsyncSession,

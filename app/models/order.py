@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Integer, Float, DateTime, ForeignKey, Enum, Boolean
+from sqlalchemy import Column, String, Integer, Float, DateTime, ForeignKey, Enum, Boolean, Text, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from enum import Enum
@@ -66,16 +66,147 @@ class Order(Base):
     packaging_notes = Column(String, nullable=True)
     cutlery_required = Column(Boolean, default=True)
     
+    payment_method = Column(
+        Text,
+        nullable=True
+    )
+ 
+    address = Column(
+        Text,
+        nullable=True
+    )
     
-class OrderItem(Base):
-    __tablename__ = "order_items"
-
-    id = Column(Integer, primary_key=True)
-
-    order_id = Column(Integer, ForeignKey("orders.id"), nullable=False)
-
-    name = Column(String, nullable=False)
-    quantity = Column(Integer, default=1)
-    price = Column(Float, nullable=False)
-
-    order = relationship("Order", back_populates="items")
+    
+    # CUSTOMER ANALYTICS
+    # =====================================================
+ 
+    rating = Column(
+        Float,
+        nullable=True
+    )
+ 
+    review = Column(
+        Text,
+        nullable=True
+    )
+ 
+    visit_count = Column(
+        Integer,
+        default=1
+    )
+ 
+    # =====================================================
+    # DASHBOARD ANALYTICS
+    # =====================================================
+ 
+    is_repeat = Column(
+        Boolean,
+        default=False
+    )
+ 
+    preparation_time = Column(
+        Integer,
+        nullable=True
+    )
+ 
+    delivery_time = Column(
+        Integer,
+        nullable=True
+    )
+ 
+    order_accuracy = Column(
+        Float,
+        default=100
+    )
+ 
+    customer_satisfaction = Column(
+        Float,
+        default=5.0
+    )
+ 
+    # =====================================================
+    # BUSINESS METRICS
+    # =====================================================
+ 
+    marketing_source = Column(
+        Text,
+        nullable=True
+    )
+ 
+    campaign_name = Column(
+        Text,
+        nullable=True
+    )
+ 
+    waste_percentage = Column(
+        Float,
+        default=0
+    )
+ 
+    stock_used = Column(
+        Float,
+        default=0
+    )
+ 
+    # =====================================================
+    # STAFF PERFORMANCE
+    # =====================================================
+ 
+    staff_rating = Column(
+        Float,
+        default=5.0
+    )
+ 
+    shift_type = Column(
+        Text,
+        nullable=True
+    )
+ 
+    # =====================================================
+    # DATE & TIME
+    # =====================================================
+ 
+    created_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now()
+    )
+ 
+    updated_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now()
+    )
+    
+    
+    items = relationship(
+        "OrderItems",
+        back_populates="order",
+        cascade="all, delete-orphan"
+    )
+ 
+    user = relationship(
+        "User",
+        back_populates="orders"
+    )
+ 
+    restaurant = relationship(
+        "Restaurant",
+        back_populates="orders"
+    )
+ 
+    # =====================================================
+    # HELPER METHODS
+    # =====================================================
+ 
+    @property
+    def is_completed(self):
+        return self.status == "completed"
+ 
+    @property
+    def is_cancelled(self):
+        return self.status == "cancelled"
+ 
+    @property
+    def is_delivered(self):
+        return self.status == "delivered"
+    
