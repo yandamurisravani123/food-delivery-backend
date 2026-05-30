@@ -12,7 +12,7 @@ from app.schemas.restaurant import (
     RestaurantOut,
     RestaurantRegisterRequest,
 )
-from app.services.delivery_service import DriverService
+from app.services.driver_service import DriverService
 from app.services.restaurant_service import RestaurantService
 
 router = APIRouter(prefix="/Super_admin", tags=["Super Admin"])
@@ -87,7 +87,7 @@ async def pending_delivery_agents(
     session: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_super_admin),
 ):
-    return await DeliveryAgentService.pending_list(session)
+    return await DriverService.pending_list(session)
 
 
 @router.post("/{delivery_agent_id}/approve-delivery", response_model=MessageResponse)
@@ -96,7 +96,7 @@ async def approve_delivery_agent(
     session: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_super_admin),
 ):
-    await DeliveryAgentService.approve_delivery_agent(
+    await DriverService.approve_delivery_agent(
         session=session,
         delivery_agent_id=delivery_agent_id,
         approved_by=current_user.id,
@@ -113,7 +113,7 @@ async def reject_delivery_agent(
     session: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_super_admin),
 ):
-    await DeliveryAgentService.reject_delivery_agent(
+    await DriverService.reject_delivery_agent(
         session=session,
         delivery_agent_id=delivery_agent_id,
         approved_by=current_user.id,
@@ -132,7 +132,7 @@ async def get_all_delivery_agents(
     session: AsyncSession = Depends(get_db),
     current_user=Depends(require_super_admin),
 ):
-    return await DeliveryAgentService.get_all_delivery_agents(session)
+    return await DriverService.get_all_delivery_agents(session)
 
 
 @router.get("/delivery-agents/{delivery_agent_id}", response_model=DriverOut)
@@ -141,7 +141,7 @@ async def get_delivery_agent_by_id(
     session: AsyncSession = Depends(get_db),
     current_user=Depends(require_super_admin),
 ):
-    return await DeliveryAgentService.get_delivery_agent_by_id(
+    return await DriverService.get_delivery_agent_by_id(
         session,
         delivery_agent_id,
     )

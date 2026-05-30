@@ -2,7 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from app.models.ratings import Rating
-from app.schemas.rating import RatingCreate
+from app.schemas.ratings_schema import RatingCreate
 
 
 class RatingService:

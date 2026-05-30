@@ -1,6 +1,14 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    ForeignKey,
+    DateTime
+)
 from sqlalchemy.orm import relationship
-from datetime import datetime
+from sqlalchemy.sql import func
+from sqlalchemy.dialects.postgresql import UUID
+import uuid
 
 from app.config.database import Base
 
@@ -10,8 +18,9 @@ class Rating(Base):
 
     id = Column(Integer, primary_key=True, index=True)
 
+    # FIXED: INTEGER -> UUID
     customer_id = Column(
-        Integer,
+        UUID(as_uuid=True),
         ForeignKey("users.id"),
         nullable=False
     )
@@ -34,12 +43,9 @@ class Rating(Base):
 
     created_at = Column(
         DateTime,
-        default=datetime.utcnow
+        server_default=func.now()
     )
 
-    # Relationships
     customer = relationship("User")
-    order = relationship("Order")
-
-    # Only keep if Driver model exists
     driver = relationship("Driver")
+    order = relationship("Order")

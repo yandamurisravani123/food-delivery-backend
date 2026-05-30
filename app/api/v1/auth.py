@@ -28,7 +28,7 @@ from app.schemas.restaurant import (
     RestaurantRegisterResponse,
 )
 from app.services.auth_service import AuthService
-from app.services.delivery_service import DriverService
+from app.services.driver_service import DriverService
 from app.services.restaurant_service import RestaurantService
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
@@ -124,7 +124,7 @@ async def register_delivery_agent(
         "profile_image": file_path,
     }
 
-    delivery_agent = await DeliveryAgentService.register(session, payload)
+    delivery_agent = await DriverService.register(session, payload)
 
     return {
         "message": "Delivery agent registered successfully. Waiting for super admin approval.",
