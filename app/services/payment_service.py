@@ -1,8 +1,7 @@
 import uuid
+import uuid
 
-from app.repositories.payment_repository import (
-    PaymentRepository
-)
+from app.models.payment import Payment
 
 from app.config.database import AsyncSessionLocal
 from app.schemas.payment import PaymentRequest
@@ -10,32 +9,49 @@ from app.schemas.payment import PaymentRequest
 class PaymentService:
 
     @staticmethod
-    async def cash_on_delivery(
-        db: AsyncSession,
-        payload
-    ):
+    async def make_payment(db, payload):
 
-        payment_data = {
+        payment_method = payload.payment_method.upper()
 
-            "order_id": payload.order_id,
+        allowed_methods = [
+            "COD",
+            "GPAY",
+            "PHONEPE",
+            "AMAZON_PAY",
+            "PAYTM",
+            "CREDIT_CARD"
+        ]
 
-            "user_id": payload.user_id,
+        if payment_method not in allowed_methods:
 
-            "payment_method": "COD",
+            return {
+                "success": False,
+                "message": "Invalid payment method"
+            }
 
-            "payment_status": "Pending",
-
-            "amount": payload.amount
-        }
-
-        payment = await PaymentRepository.create_payment(
-            db,
-            payment_data
+        payment_status = (
+            "PENDING"
+            if payment_method == "COD"
+            else "SUCCESS"
         )
 
+        payment = Payment(
+            order_id=payload.order_id,
+            user_id=payload.user_id,
+            payment_method=payment_method,
+            payment_status=payment_status,
+            amount=float(payload.amount),
+            transaction_id=str(uuid.uuid4())
+        )
+
+        db.add(payment)
+
+        await db.commit()
+
+        await db.refresh(payment)
+
         return {
-
-            "message": "Cash On Delivery Order Placed Successfully",
-
+            "success": True,
+            "message": f"{payment_method} payment successful",
             "payment": payment
         }
