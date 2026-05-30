@@ -1,23 +1,10 @@
-from fastapi import (
-    APIRouter,
-    Depends
-)
+from fastapi import APIRouter, Depends
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from sqlalchemy.ext.asyncio import (
-    AsyncSession
-)
+from app.config.database import get_db
+from app.schemas.payment import CODPaymentSchema
+from app.services.payment_service import PaymentService
 
-from app.config.database import (
-    get_db
-)
-
-from app.schemas.payment import (
-    CODPaymentSchema
-)
-
-from app.services.payment_service import (
-    PaymentService
-)
 
 router = APIRouter(
     prefix="/payments",
@@ -34,8 +21,10 @@ async def cash_on_delivery(
     payload: CODPaymentSchema,
     db: AsyncSession = Depends(get_db)
 ):
-
-    return await PaymentService.cash_on_delivery(
-        db,
-        payload
+    
+    result = await PaymentService.cash_on_delivery(
+        db=db,
+        payload=payload
     )
+
+    return result

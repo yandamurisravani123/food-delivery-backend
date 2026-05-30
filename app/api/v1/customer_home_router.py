@@ -130,3 +130,117 @@ async def cart_count(
             customer_id=customer_id
         )
     )
+
+
+# ==========================
+# tracking
+# ==========================
+from fastapi import APIRouter
+
+router = APIRouter(
+    prefix="/customer",
+    tags=["Customer"]
+)
+
+
+@router.get("/tracking")
+def tracking():
+
+    return {
+        "message": "Tracking API Working"
+    }
+
+
+@router.get("/notifications")
+def get_notifications():
+
+    return {
+        "notifications": [
+            {
+                "title": "Order Confirmed",
+                "message": "Your order has been confirmed"
+            },
+            {
+                "title": "Out For Delivery",
+                "message": "Delivery partner is on the way"
+            }
+        ]
+    }
+
+from fastapi import APIRouter
+from app.schemas.payment import PaymentRequest
+from app.services.payment_service import PaymentService
+
+router = APIRouter(
+    prefix="/payments",
+    tags=["Payments"]
+)
+
+
+@router.post("/pay")
+def make_payment(payment: PaymentRequest):
+
+    response = PaymentService.create_payment(payment)
+
+    return response
+
+# ==========================
+# notification
+# ==========================
+from fastapi import (
+    APIRouter,
+    Depends
+)
+
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.config.database import get_db
+
+from app.schemas.notification import (
+    NotificationCreateSchema,
+    NotificationResponseSchema
+)
+
+from app.services.notification_service import (
+    NotificationService
+)
+
+
+router = APIRouter(
+    prefix="/notifications",
+    tags=["Notifications"]
+)
+
+
+@router.post(
+    "/create",
+    response_model=NotificationResponseSchema
+)
+async def create_notification(
+    data: NotificationCreateSchema,
+    db: AsyncSession = Depends(get_db)
+):
+
+    notification = await NotificationService.create_notification(
+        db,
+        data
+    )
+
+    return notification
+
+
+@router.get(
+    "/user/{user_id}",
+    response_model=list[NotificationResponseSchema]
+)
+async def get_notifications(
+    user_id: str,
+    db: AsyncSession = Depends(get_db)
+):
+
+    notifications = await NotificationService.get_notifications(
+        db,
+        user_id
+    )
+
+    return notifications
