@@ -3,7 +3,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.sql import func
 import uuid
 
-from app.models.base import Base
+from app.config.database import Base
 
 
 class WalletTransaction(Base):
@@ -19,4 +19,7 @@ class WalletTransaction(Base):
 
     description = Column(String)
 
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    created_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now()
+    )

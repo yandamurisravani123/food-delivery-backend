@@ -116,6 +116,9 @@ async def lifespan(app: FastAPI):
 # FASTAPI APP
 # =====================================================
 
+
+
+
 app = FastAPI(
     title="Food Delivery Backend",
     lifespan=lifespan

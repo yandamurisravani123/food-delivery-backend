@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
@@ -19,10 +21,15 @@ class WalletService:
     @staticmethod
     async def add_money(db: AsyncSession, user_id, amount):
 
+        amount = Decimal(str(amount))
+
         wallet = await WalletService.get_wallet(db, user_id)
 
         if not wallet:
-            wallet = Wallet(user_id=user_id, balance=0)
+            wallet = Wallet(
+                user_id=user_id,
+                balance=Decimal("0.00")
+            )
 
             db.add(wallet)
 
@@ -31,7 +38,7 @@ class WalletService:
         transaction = WalletTransaction(
             user_id=user_id,
             transaction_type="CREDIT",
-            amount=amount,
+            amount=float(amount),
             description="Added to Wallet"
         )
 
@@ -43,10 +50,20 @@ class WalletService:
         return wallet
 
     @staticmethod
-    async def transfer_money(db, sender_id, receiver_id, amount):
+    async def transfer_money(
+        db: AsyncSession,
+        sender_id,
+        receiver_id,
+        amount
+    ):
+
+        amount = Decimal(str(amount))
 
         sender = await WalletService.get_wallet(db, sender_id)
         receiver = await WalletService.get_wallet(db, receiver_id)
+
+        if not sender:
+            raise Exception("Sender wallet not found")
 
         if sender.balance < amount:
             raise Exception("Insufficient balance")
@@ -54,7 +71,11 @@ class WalletService:
         sender.balance -= amount
 
         if not receiver:
-            receiver = Wallet(user_id=receiver_id, balance=0)
+            receiver = Wallet(
+                user_id=receiver_id,
+                balance=Decimal("0.00")
+            )
+
             db.add(receiver)
 
         receiver.balance += amount
@@ -63,7 +84,7 @@ class WalletService:
             WalletTransaction(
                 user_id=sender_id,
                 transaction_type="DEBIT",
-                amount=amount,
+                amount=float(amount),
                 description="Transfer Sent"
             )
         )
@@ -72,11 +93,13 @@ class WalletService:
             WalletTransaction(
                 user_id=receiver_id,
                 transaction_type="CREDIT",
-                amount=amount,
+                amount=float(amount),
                 description="Transfer Received"
             )
         )
 
         await db.commit()
 
-        return {"message": "Transfer successful"}
+        return {
+            "message": "Transfer successful"
+        }

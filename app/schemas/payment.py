@@ -1,10 +1,14 @@
 from pydantic import BaseModel
 from uuid import UUID
-from typing import Optional
+from decimal import Decimal
 
 
-class CODPaymentSchema(BaseModel):
-    order_id: UUID
-    amount: float
-    payment_method: str = "COD"
-    status: Optional[str] = "Pending"
+class PaymentSchema(BaseModel):
+
+    order_id: int
+
+    user_id: UUID
+
+    amount: Decimal
+
+    payment_method: str

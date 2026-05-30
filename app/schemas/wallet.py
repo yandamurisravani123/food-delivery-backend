@@ -1,17 +1,17 @@
 from pydantic import BaseModel
 from uuid import UUID
-from typing import Optional
+from decimal import Decimal
 
 
 class AddMoneySchema(BaseModel):
     user_id: UUID
-    amount: float
+    amount: Decimal
 
 
 class TransferMoneySchema(BaseModel):
     sender_id: UUID
     receiver_id: UUID
-    amount: float
+    amount: Decimal
 
 
 class WalletResponse(BaseModel):
