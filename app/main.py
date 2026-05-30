@@ -374,6 +374,13 @@ app.include_router(
 )
 
 
+from app.api.v1.customer.rewards import (
+    router as rewards_router
+)
+
+app.include_router(
+    rewards_router
+)
 
 
 # Root Endpoint

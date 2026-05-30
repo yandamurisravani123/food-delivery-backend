@@ -2,6 +2,7 @@ from uuid import uuid4
 
 from sqlalchemy import (
     Integer,
+    String,
     DateTime,
     func
 )
@@ -12,8 +13,8 @@ from sqlalchemy.orm import mapped_column
 from app.config.database import Base
 
 
-class RewardPoint(Base):
-    __tablename__ = "reward_points"
+class RewardTransaction(Base):
+    __tablename__ = "reward_transactions"
 
     id = mapped_column(
         UUID(as_uuid=True),
@@ -23,27 +24,25 @@ class RewardPoint(Base):
 
     user_id = mapped_column(
         UUID(as_uuid=True),
-        nullable=False,
-        unique=True
+        nullable=False
     )
 
-    current_points = mapped_column(
+    points = mapped_column(
         Integer,
-        default=0
+        nullable=False
     )
 
-    target_points = mapped_column(
-        Integer,
-        default=5000
+    transaction_type = mapped_column(
+        String,
+        nullable=False
+    )  # EARNED / REDEEMED
+
+    description = mapped_column(
+        String,
+        nullable=False
     )
 
     created_at = mapped_column(
         DateTime,
         server_default=func.now()
-    )
-
-    updated_at = mapped_column(
-        DateTime,
-        server_default=func.now(),
-        onupdate=func.now()
     )

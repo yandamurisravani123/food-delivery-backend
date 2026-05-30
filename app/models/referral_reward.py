@@ -12,8 +12,8 @@ from sqlalchemy.orm import mapped_column
 from app.config.database import Base
 
 
-class RewardPoint(Base):
-    __tablename__ = "reward_points"
+class ReferralReward(Base):
+    __tablename__ = "referral_rewards"
 
     id = mapped_column(
         UUID(as_uuid=True),
@@ -21,29 +21,22 @@ class RewardPoint(Base):
         default=uuid4
     )
 
-    user_id = mapped_column(
+    referrer_id = mapped_column(
         UUID(as_uuid=True),
-        nullable=False,
-        unique=True
+        nullable=False
     )
 
-    current_points = mapped_column(
-        Integer,
-        default=0
+    referred_user_id = mapped_column(
+        UUID(as_uuid=True),
+        nullable=False
     )
 
-    target_points = mapped_column(
+    points_awarded = mapped_column(
         Integer,
-        default=5000
+        default=500
     )
 
     created_at = mapped_column(
         DateTime,
         server_default=func.now()
-    )
-
-    updated_at = mapped_column(
-        DateTime,
-        server_default=func.now(),
-        onupdate=func.now()
     )
