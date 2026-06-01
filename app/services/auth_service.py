@@ -91,10 +91,18 @@ class AuthService:
         redis_key = f"otp:{payload.email.lower()}"
         await redis_client.setex(redis_key, 600, otp_hash)
 
-        send_otp_email(payload.email, otp)
+        otp_sent = send_otp_email(payload.email, otp)
+        message = (
+            "User registered successfully. OTP sent to email."
+            if otp_sent
+            else (
+                "User registered successfully. OTP could not be delivered. "
+                "Check SMTP settings or use the OTP returned by the response."
+            )
+        )
 
         return RegisterResponse(
-            message="User registered successfully. OTP sent to email.",
+            message=message,
             user=UserOut(
                 id=user.id,
                 name=user.full_name,
@@ -103,6 +111,7 @@ class AuthService:
                 status="inactive",
                 is_active=user.is_active,
             ),
+            otp=otp if not otp_sent else None,
         )
 
     @staticmethod
@@ -156,9 +165,17 @@ class AuthService:
 
         await redis_client.setex(f"otp:{payload.email.lower()}", 600, otp_hash)
 
-        send_otp_email(payload.email, otp)
+        otp_sent = send_otp_email(payload.email, otp)
+        message = (
+            "OTP resent successfully."
+            if otp_sent
+            else (
+                "OTP generation succeeded, but email delivery failed. "
+                "Check SMTP settings or use the OTP returned by the response."
+            )
+        )
 
-        return MessageResponse(message="OTP resent successfully")
+        return MessageResponse(message=message, otp=otp if not otp_sent else None)
 
     @staticmethod
     async def login(session: AsyncSession, payload: LoginRequest):

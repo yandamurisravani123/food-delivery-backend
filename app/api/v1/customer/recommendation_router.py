@@ -4,8 +4,6 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config.database import get_db
-
-from app.models.order import Order
 from app.models.food import Food
 from app.models.user_preference import UserPreference
 from uuid import UUID

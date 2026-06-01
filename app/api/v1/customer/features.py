@@ -4,11 +4,11 @@ from sqlalchemy.orm import Session
  
 from app.core.database import get_db
  
-from app.schemas.feature import (
+from app.schemas.features import (
     FeatureCreate
 )
- 
-from app.services.feature_service import (
+
+from app.services.features import (
     FeatureService
 )
  

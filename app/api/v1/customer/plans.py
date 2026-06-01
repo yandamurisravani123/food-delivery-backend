@@ -5,14 +5,14 @@ from fastapi import Depends
 from sqlalchemy.orm import Session
  
 from app.core.database import get_db
-from app.schemas.plan import (
+from app.schemas.plans import (
     PlanCreate,
     PlanUpdate,
     PlanResponse,
 )
-from app.services.plan_service import PlanService
-from app.models.plan import Plan
-from app.models.feature import Feature
+from app.services.plans import PlanService
+from app.models.plans import Plan
+from app.models.features import Feature
 from sqlalchemy import or_
  
 router = APIRouter(

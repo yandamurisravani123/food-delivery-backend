@@ -1,13 +1,14 @@
+import logging
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-from fastapi import logger
-
 from app.config.settings import settings
 
+logger = logging.getLogger(__name__)
 
-def send_otp_email(to_email: str, otp: str) -> None:
+
+def send_otp_email(to_email: str, otp: str) -> bool:
     subject = "Verify Your Account - OTP Code"
 
     text_body = f"""
@@ -105,10 +106,29 @@ Food Delivery Team
     msg.attach(MIMEText(text_body, "plain"))
     msg.attach(MIMEText(html_body, "html"))
 
-    with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT) as server:
-        server.starttls()
-        server.login(settings.SMTP_USERNAME, settings.SMTP_PASSWORD)
-        server.sendmail(settings.FROM_EMAIL, [to_email], msg.as_string())
+    if not settings.SMTP_USERNAME or not settings.SMTP_PASSWORD:
+        logger.warning(
+            "SMTP credentials are not configured; skipping OTP email to %s. OTP: %s",
+            to_email,
+            otp,
+        )
+        return False
+
+    try:
+        with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT, timeout=20) as server:
+            server.starttls()
+            server.login(settings.SMTP_USERNAME, settings.SMTP_PASSWORD)
+            server.sendmail(settings.FROM_EMAIL, [to_email], msg.as_string())
+        logger.info("OTP email sent to %s", to_email)
+        return True
+    except smtplib.SMTPAuthenticationError as e:
+        logger.error("SMTP auth failed for %s: %s", to_email, e)
+        logger.warning("OTP for %s: %s", to_email, otp)
+        return False
+    except Exception as e:
+        logger.exception("Failed to send OTP email to %s", to_email)
+        logger.warning("OTP for %s: %s", to_email, otp)
+        return False
 
 
 def send_restaurant_approval_email(to_email: str, restaurant_name: str) -> None:
