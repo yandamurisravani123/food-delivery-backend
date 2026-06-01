@@ -29,7 +29,7 @@ from app.api.v1.superadmin_router import (
     router as superadmin_router
 )
 
-from app.api.v1.auth import (
+from app.api.v1.restaurant.auth import (
     router as auth
 )
 
