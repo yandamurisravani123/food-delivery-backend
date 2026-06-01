@@ -16,9 +16,9 @@ class Menu(Base):
 
     __tablename__ = "menus"
 
-    # ==========================================
+    
     # Primary Key
-    # ==========================================
+    
 
     id = Column(
         UUID(as_uuid=True),
@@ -27,19 +27,18 @@ class Menu(Base):
         index=True
     )
 
-    # ==========================================
+    
     # Restaurant Foreign Key
-    # ==========================================
-
+    
     restaurant_id = Column(
         UUID(as_uuid=True),
         ForeignKey("restaurants.id"),
         nullable=False
     )
 
-    # ==========================================
+    
     # Menu Details
-    # ==========================================
+    
 
     name = Column(
         String(255),

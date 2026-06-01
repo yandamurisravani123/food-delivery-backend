@@ -6,9 +6,9 @@ from sqlalchemy import (
 
 from app.config.database import Base
 
-# ==========================================
-# ADD THESE IMPORTS
-# ==========================================
+
+
+
 
 import uuid
 
@@ -24,9 +24,9 @@ class Filter(Base):
 
     __tablename__ = "filters"
 
-    # ==========================================
-    # REPLACE OLD ID FIELD
-    # ==========================================
+   
+    
+    
 
     id = Column(
         UUID(as_uuid=True),
@@ -35,16 +35,11 @@ class Filter(Base):
         index=True
     )
 
-    # ==========================================
-    # KEEP OLD FIELD
-    # ==========================================
-
+  
+    
     title = Column(String)
 
-    # ==========================================
-    # ADD THESE NEW FIELDS
-    # ==========================================
-
+    
     cuisine = Column(
         String(100),
         nullable=True

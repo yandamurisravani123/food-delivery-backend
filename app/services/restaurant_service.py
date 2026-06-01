@@ -271,12 +271,11 @@ class RestaurantService:
             "data": restaurants
         }
 
-    # Restaurant Menu
    
 
-        # ==========================================
+        
     # Restaurant Menu
-    # ==========================================
+  
 
     @staticmethod
     async def restaurant_menu(
@@ -295,9 +294,9 @@ class RestaurantService:
             "data": menu
         }
 
-    # ==========================================
+
     # Restaurant Reviews
-    # ==========================================
+
 
     @staticmethod
     async def restaurant_reviews(

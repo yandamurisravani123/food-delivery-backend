@@ -22,10 +22,9 @@ class Restaurant(Base):
 
     __tablename__ = "restaurants"
 
-    # ==========================================
+    
     # Primary Key
-    # ==========================================
-
+   
     id = Column(
         UUID(as_uuid=True),
         primary_key=True,
@@ -33,10 +32,9 @@ class Restaurant(Base):
         index=True
     )
 
-    # ==========================================
+   
     # Basic Restaurant Details
-    # ==========================================
-
+    
     restaurant_name = Column(
         String(150),
         nullable=False,
@@ -55,9 +53,9 @@ class Restaurant(Base):
         default=0.0
     )
 
-    # ==========================================
+    
     # Owner Details
-    # ==========================================
+   
 
     owner_name = Column(
         String(100),
@@ -81,18 +79,18 @@ class Restaurant(Base):
         nullable=False
     )
 
-    # ==========================================
+    
     # Restaurant Contact
-    # ==========================================
+
 
     restaurant_phone = Column(
         String(20),
         nullable=False
     )
 
-    # ==========================================
+    
     # Address Details
-    # ==========================================
+    
 
     address_line1 = Column(
         String(255),
@@ -120,18 +118,18 @@ class Restaurant(Base):
         nullable=False
     )
 
-    # ==========================================
+    
     # Full Address
-    # ==========================================
+    
 
     address = Column(
         String(500),
         nullable=True
     )
 
-    # ==========================================
+   
     # Geo Location
-    # ==========================================
+    
 
     latitude = Column(
         Float,
@@ -143,9 +141,9 @@ class Restaurant(Base):
         nullable=True
     )
 
-    # ==========================================
+    
     # Restaurant Timings
-    # ==========================================
+    
 
     opening_time = Column(
         String(20),
@@ -157,9 +155,9 @@ class Restaurant(Base):
         nullable=True
     )
 
-    # ==========================================
+    
     # Legal Details
-    # ==========================================
+  
 
     gst_number = Column(
         String(50),
@@ -171,9 +169,9 @@ class Restaurant(Base):
         nullable=True
     )
 
-    # ==========================================
+   
     # Restaurant Status
-    # ==========================================
+    
 
     status = Column(
         String(20),
@@ -187,9 +185,8 @@ class Restaurant(Base):
         default=False
     )
 
-    # ==========================================
+    
     # Home Page Flags
-    # ==========================================
 
     is_trending = Column(
         Boolean,
@@ -201,9 +198,9 @@ class Restaurant(Base):
         default=False
     )
 
-    # ==========================================
+    
     # Approval Details
-    # ==========================================
+   
 
     approved_by = Column(
         UUID(as_uuid=True),
@@ -211,9 +208,8 @@ class Restaurant(Base):
         nullable=True
     )
 
-    # ==========================================
     # Timestamps
-    # ==========================================
+    
 
     created_at = Column(
         DateTime(timezone=True),

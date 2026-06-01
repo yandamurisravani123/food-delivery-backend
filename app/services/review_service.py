@@ -13,9 +13,9 @@ from app.utils.file_upload import (
 
 class ReviewService:
 
-    # =====================================================
+    
     # 1. GET ORDER DETAILS
-    # =====================================================
+    
 
     @staticmethod
     async def get_order_details(
@@ -28,9 +28,9 @@ class ReviewService:
             "name": "Restaurant"
         }
 
-    # =====================================================
+    
     # 2. SUBMIT REVIEW
-    # =====================================================
+
 
     @staticmethod
     async def submit_restaurant_review(
@@ -58,10 +58,9 @@ class ReviewService:
             "review_id": str(review.id)
         }
 
-    # =====================================================
+    
     # 3. UPLOAD REVIEW PHOTOS
-    # =====================================================
-
+    
     @staticmethod
     async def upload_review_photos(
         db,
@@ -87,9 +86,9 @@ class ReviewService:
             "photos": uploaded_photos
         }
 
-    # =====================================================
+    
     # 4. DELETE PHOTO
-    # =====================================================
+   
 
     @staticmethod
     async def delete_review_photo(
@@ -102,9 +101,9 @@ class ReviewService:
             "message": "Photo deleted successfully"
         }
 
-    # =====================================================
+
     # 5. DELIVERY FEEDBACK
-    # =====================================================
+
 
     @staticmethod
     async def get_delivery_feedback(
@@ -117,10 +116,9 @@ class ReviewService:
             "message": "Delivery feedback screen"
         }
 
-    # =====================================================
+    
     # 6. REVIEW STATUS
-    # =====================================================
-
+    
     @staticmethod
     async def check_review_status(
         db,

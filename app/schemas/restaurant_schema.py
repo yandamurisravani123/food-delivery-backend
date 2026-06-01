@@ -8,9 +8,7 @@ from pydantic import (
 from typing import Optional
 
 
-# ==========================================
-# Restaurant Register Request
-# ==========================================
+#
 
 class RestaurantRegisterRequest(BaseModel):
 
@@ -59,9 +57,6 @@ class RestaurantRegisterRequest(BaseModel):
     banner_image: Optional[str] = None
 
 
-# ==========================================
-# Restaurant Response
-# ==========================================
 
 class RestaurantResponse(BaseModel):
 

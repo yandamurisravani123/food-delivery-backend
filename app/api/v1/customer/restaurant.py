@@ -23,9 +23,6 @@ router = APIRouter(
 )
 
 
-# ==========================================
-# Get Restaurant By ID
-# ==========================================
 
 @router.get("/{restaurant_id}")
 async def get_restaurant(
@@ -39,9 +36,7 @@ async def get_restaurant(
     )
 
 
-# ==========================================
-# Nearby Restaurants
-# ==========================================
+
 
 @router.get("/nearby/list")
 async def nearby_restaurants(
@@ -53,9 +48,6 @@ async def nearby_restaurants(
     )
 
 
-# ==========================================
-# Restaurant Menu
-# ==========================================
 
 @router.get("/{restaurant_id}/menu")
 async def get_restaurant_menu(
@@ -69,9 +61,6 @@ async def get_restaurant_menu(
     )
 
 
-# ==========================================
-# Restaurant Reviews
-# ==========================================
 
 @router.get("/{restaurant_id}/reviews")
 async def get_restaurant_reviews(
