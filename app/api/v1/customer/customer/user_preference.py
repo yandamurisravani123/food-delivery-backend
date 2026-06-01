@@ -1,14 +1,18 @@
 from fastapi import APIRouter, Depends, HTTPException
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from uuid import UUID
 
 from app.config.database import get_db
 from app.models.user_preference import UserPreference
+
 from app.schemas.user_preference import (
     PreferenceCreate,
     PreferenceUpdate
 )
+
+from uuid import UUID
+
 
 router = APIRouter(
     prefix="/preferences",
@@ -22,6 +26,7 @@ async def create_preference(
     payload: PreferenceCreate,
     db: AsyncSession = Depends(get_db)
 ):
+
     new_preference = UserPreference(
         user_id=payload.user_id,
         favorite_cuisine=payload.favorite_cuisine,
@@ -30,7 +35,9 @@ async def create_preference(
     )
 
     db.add(new_preference)
+
     await db.commit()
+
     await db.refresh(new_preference)
 
     return {
@@ -44,6 +51,7 @@ async def create_preference(
 async def get_all_preferences(
     db: AsyncSession = Depends(get_db)
 ):
+
     result = await db.execute(
         select(UserPreference)
     )
@@ -59,13 +67,14 @@ async def get_user_preference(
     user_id: UUID,
     db: AsyncSession = Depends(get_db)
 ):
+
     result = await db.execute(
         select(UserPreference).where(
             UserPreference.user_id == user_id
         )
     )
 
-    preference = result.scalar_one_or_none()
+    preference = result.scalar()
 
     if not preference:
         raise HTTPException(
@@ -80,16 +89,17 @@ async def get_user_preference(
 @router.put("/{preference_id}")
 async def update_preference(
     preference_id: UUID,
-    payload: PreferenceUpdate,
+    preference: PreferenceUpdate,
     db: AsyncSession = Depends(get_db)
 ):
+
     result = await db.execute(
         select(UserPreference).where(
             UserPreference.id == preference_id
         )
     )
 
-    preference = result.scalar_one_or_none()
+    preference = result.scalar()
 
     if not preference:
         raise HTTPException(
@@ -102,6 +112,7 @@ async def update_preference(
     preference.preferred_food_type = payload.preferred_food_type
 
     await db.commit()
+
     await db.refresh(preference)
 
     return {
@@ -111,18 +122,18 @@ async def update_preference(
 
 
 # DELETE PREFERENCE
-@router.delete("/{preference_id}")
+@router.delete("/{user_id}")
 async def delete_preference(
-    preference_id: UUID,
+    user_id: UUID,
     db: AsyncSession = Depends(get_db)
 ):
-    result = await db.execute(
-        select(UserPreference).where(
-            UserPreference.id == preference_id
-        )
-    )
 
-    preference = result.scalar_one_or_none()
+    result = await db.execute(
+    select(UserPreference).where(
+        UserPreference.id == preference_id
+    )
+)
+    preference = result.scalar()
 
     if not preference:
         raise HTTPException(
@@ -131,6 +142,7 @@ async def delete_preference(
         )
 
     await db.delete(preference)
+
     await db.commit()
 
     return {
