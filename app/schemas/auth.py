@@ -71,7 +71,6 @@ class UserOut(BaseModel):
 class RegisterResponse(BaseModel):
     message: str
     user: UserOut
-    otp: Optional[str] = None
 
 
 class TokenResponse(BaseModel):
@@ -95,4 +94,3 @@ class ResetPasswordRequest(BaseModel):
 
 class MessageResponse(BaseModel):
     message: str
-    otp: Optional[str] = None

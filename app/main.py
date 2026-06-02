@@ -128,9 +128,12 @@ async def lifespan(app: FastAPI):
 
     print("✅ Database Connected")
 
-    await connect_redis()
+    redis_available = await connect_redis()
 
-    print("✅ Redis Connected")
+    if redis_available:
+        print("✅ Redis Connected")
+    else:
+        print("❌ Redis not available, continuing without Redis")
 
     yield
 
