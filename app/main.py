@@ -48,23 +48,6 @@ async def lifespan(app: FastAPI):
 
     async with engine.begin() as conn:
 
-        print("\n================ DATABASE METADATA ================\n")
-
-        users_table = Base.metadata.tables.get("users")
-        if users_table is not None:
-            print("USERS TABLE:")
-            for col in users_table.columns:
-                print(f"  {col.name} -> {col.type}")
-
-        print()
-
-        checkout_table = Base.metadata.tables.get("checkout")
-        if checkout_table is not None:
-            print("CHECKOUT TABLE:")
-            for col in checkout_table.columns:
-                print(f"  {col.name} -> {col.type}")
-
-        print("\n===================================================\n")
 
         await conn.run_sync(Base.metadata.create_all)
 

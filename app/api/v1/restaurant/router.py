@@ -354,30 +354,7 @@ def get_restaurant_menu(
 
     return grouped_menu
 
-@router.put("/menu/item/{item_id}/stock")
-def update_stock_status(
-    item_id: str,
-    is_available: bool,
-    db: Session = Depends(get_db)
-):
 
-    item = db.query(MenuItem).filter(
-        MenuItem.id == item_id
-    ).first()
-
-    if not item:
-        return {
-            "error": "Menu item not found"
-        }
-
-    item.is_available = is_available
-
-    db.commit()
-
-    return {
-        "message": "Stock updated successfully"
-    }
-    
 @router.put("/menu/item/{item_id}/stock")
 def update_stock_status(
     item_id: str,
