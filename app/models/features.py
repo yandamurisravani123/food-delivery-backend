@@ -8,7 +8,7 @@ from sqlalchemy.sql import func
  
 from sqlalchemy.orm import relationship
  
-from app.core.database import Base
+from app.config.database import Base
  
  
 class Feature(Base):

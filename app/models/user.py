@@ -1,17 +1,20 @@
 import uuid
 
-from sqlalchemy import UUID, Column, Integer, String, Boolean, DateTime, func
-from sqlalchemy.orm import mapped_column
+from sqlalchemy import Column, String, Boolean, DateTime, func
+from sqlalchemy.dialects.postgresql import UUID
 from app.config.database import Base
+
 
 class User(Base):
     __tablename__ = "users"
-    id = mapped_column(
+
+    id = Column(
         UUID(as_uuid=True),
         primary_key=True,
         default=uuid.uuid4,
         index=True,
     )
+
     full_name = Column(String(120), nullable=False)
     email = Column(String(255), unique=True, index=True, nullable=False)
     phone = Column(String(20), unique=True, index=True, nullable=True)

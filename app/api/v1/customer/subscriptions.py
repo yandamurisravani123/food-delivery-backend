@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from app.core.database import get_db
+from app.config.database import get_db
 from app.services.subscriptions import SubscriptionService
 router = APIRouter(prefix="/subscriptions", tags=["Subscriptions"])
 @router.post("/subscribe/{plan_id}")

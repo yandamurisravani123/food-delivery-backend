@@ -9,7 +9,7 @@ from sqlalchemy import JSON
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
  
-from app.core.database import Base
+from app.config.database import Base
  
  
 class Plan(Base):

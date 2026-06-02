@@ -105,18 +105,10 @@ Food Delivery Team
     msg.attach(MIMEText(text_body, "plain"))
     msg.attach(MIMEText(html_body, "html"))
 
-    try:
-        with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT, timeout=20) as server:
-            server.ehlo()
-            server.starttls()
-            server.ehlo()
-            server.login(settings.SMTP_USERNAME, settings.SMTP_PASSWORD)
-            server.sendmail(settings.FROM_EMAIL, [to_email], msg.as_string())
-        return True
-    except Exception as e:
-        logger.exception("Failed to send OTP email to %s: %s", to_email, e)
-        logger.warning("OTP for %s is %s", to_email, otp)
-        return False
+    with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT) as server:
+        server.starttls()
+        server.login(settings.SMTP_USERNAME, settings.SMTP_PASSWORD)
+        server.sendmail(settings.FROM_EMAIL, [to_email], msg.as_string())
 
 
 def send_restaurant_approval_email(to_email: str, restaurant_name: str) -> None:

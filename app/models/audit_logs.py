@@ -4,7 +4,7 @@ from sqlalchemy import String
 from sqlalchemy import DateTime
 from sqlalchemy.sql import func
  
-from app.core.database import Base
+from app.config.database import Base
  
  
 class AuditLog(Base):

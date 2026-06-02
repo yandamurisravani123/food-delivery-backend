@@ -1,8 +1,16 @@
 from fastapi import APIRouter, FastAPI
 from contextlib import asynccontextmanager
+from pathlib import Path
+import importlib
 from sqlalchemy import text
-from app.core.database import Base, engine
+from app.config.database import Base, engine
 
+
+# Import all models so SQLAlchemy metadata includes every table
+models_dir = Path(__file__).resolve().parent / "models"
+for model_file in models_dir.glob("*.py"):
+    if model_file.stem != "__init__":
+        importlib.import_module(f"app.models.{model_file.stem}")
 
 from app.api.v1.customer.feedback import router as feedback_router
 from app.api.v1.customer.customer_home_router import router as customer_home_router
@@ -39,7 +47,27 @@ from app.core.redis_client import (
 async def lifespan(app: FastAPI):
 
     async with engine.begin() as conn:
+
+        print("\n================ DATABASE METADATA ================\n")
+
+        users_table = Base.metadata.tables.get("users")
+        if users_table is not None:
+            print("USERS TABLE:")
+            for col in users_table.columns:
+                print(f"  {col.name} -> {col.type}")
+
+        print()
+
+        checkout_table = Base.metadata.tables.get("checkout")
+        if checkout_table is not None:
+            print("CHECKOUT TABLE:")
+            for col in checkout_table.columns:
+                print(f"  {col.name} -> {col.type}")
+
+        print("\n===================================================\n")
+
         await conn.run_sync(Base.metadata.create_all)
+
         await conn.execute(
             text(
                 "ALTER TABLE orders ADD COLUMN IF NOT EXISTS status VARCHAR(50) NOT NULL DEFAULT 'pending'"

@@ -13,7 +13,7 @@ from app.config.security import (
     token_fingerprint,
     verify_password,
 )
-from app.core.redis_client import redis_delete, redis_get, redis_setex
+from app.core.redis_client import redis_client
 from app.repositories.auth_repository import AuthRepository
 from app.schemas.auth import (
     ForgotPasswordRequest,
@@ -89,20 +89,9 @@ class AuthService:
         otp_hash = hashlib.sha256(otp.encode()).hexdigest()
 
         redis_key = f"otp:{payload.email.lower()}"
-        await redis_setex(redis_key, 600, otp_hash)
+        await redis_client.setex(redis_key, 600, otp_hash)
 
-        if not send_otp_email(payload.email, otp):
-            return RegisterResponse(
-                message="User registered successfully, but OTP email delivery failed. Check SMTP settings or use admin support.",
-                user=UserOut(
-                    id=user.id,
-                    name=user.full_name,
-                    email=user.email,
-                    role=user.role,
-                    status="inactive",
-                    is_active=user.is_active,
-                ),
-            )
+        send_otp_email(payload.email, otp)
 
         return RegisterResponse(
             message="User registered successfully. OTP sent to email.",
@@ -126,7 +115,7 @@ class AuthService:
             )
 
         redis_key = f"otp:{payload.email.lower()}"
-        stored_hash = await redis_get(redis_key)
+        stored_hash = await redis_client.get(redis_key)
 
         if not stored_hash:
             raise HTTPException(
@@ -146,7 +135,7 @@ class AuthService:
         await session.commit()
         await session.refresh(user)
 
-        await redis_delete(redis_key)
+        await redis_client.delete(redis_key)
 
         return MessageResponse(message="OTP verified successfully")
 
@@ -165,13 +154,9 @@ class AuthService:
         otp = f"{secrets.randbelow(1000000):06d}"
         otp_hash = hashlib.sha256(otp.encode()).hexdigest()
 
-        redis_key = f"otp:{payload.email.lower()}"
-        await redis_setex(redis_key, 600, otp_hash)
+        await redis_client.setex(f"otp:{payload.email.lower()}", 600, otp_hash)
 
-        if not send_otp_email(payload.email, otp):
-            return MessageResponse(
-                message="OTP generated successfully, but email delivery failed. Check SMTP settings or use admin support.",
-            )
+        send_otp_email(payload.email, otp)
 
         return MessageResponse(message="OTP resent successfully")
 
@@ -409,7 +394,7 @@ class AuthService:
                 ttl = 0
 
             token_key = f"blacklist:{token_fingerprint(token)}"
-            await redis_setex(token_key, ttl, "1")
+            await redis_client.setex(token_key, ttl, "1")
 
             return MessageResponse(message="Logged out successfully")
 
