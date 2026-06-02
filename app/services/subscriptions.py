@@ -3,8 +3,8 @@ from datetime import timedelta
  
 from sqlalchemy.orm import Session
  
-from app.models.plan import Plan
-from app.models.subscription import Subscription
+from app.models.plans import Plan
+from app.models.subscriptions import Subscription
  
  
 class SubscriptionService:
@@ -96,3 +96,4 @@ class SubscriptionService:
             )
             .all()
         )
+ 

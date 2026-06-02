@@ -1,13 +1,13 @@
 from app.repositories.checkout_repository import CheckoutRepository
-
-
+ 
+ 
 class CheckoutService:
-
+ 
     @staticmethod
     async def create_checkout(db, payload):
-
+ 
         total = payload.subtotal + payload.delivery_fee
-
+ 
         data = {
             "user_id": payload.user_id,
             "address": payload.address,
@@ -19,13 +19,14 @@ class CheckoutService:
             "total": total,
             "is_paid": False
         }
-
+ 
         checkout = await CheckoutRepository.create_checkout(
             db,
             data
         )
-
+ 
         return {
             "id": str(checkout.id),
             "message": "Order Scheduled Successfully"
         }
+ 

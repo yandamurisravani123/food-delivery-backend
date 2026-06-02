@@ -2,12 +2,14 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-from fastapi import logger
+import logging
+
+logger = logging.getLogger(__name__)
 
 from app.config.settings import settings
 
 
-def send_otp_email(to_email: str, otp: str) -> None:
+def send_otp_email(to_email: str, otp: str) -> bool:
     subject = "Verify Your Account - OTP Code"
 
     text_body = f"""
@@ -105,10 +107,18 @@ Food Delivery Team
     msg.attach(MIMEText(text_body, "plain"))
     msg.attach(MIMEText(html_body, "html"))
 
-    with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT) as server:
-        server.starttls()
-        server.login(settings.SMTP_USERNAME, settings.SMTP_PASSWORD)
-        server.sendmail(settings.FROM_EMAIL, [to_email], msg.as_string())
+    try:
+        with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT, timeout=20) as server:
+            server.ehlo()
+            server.starttls()
+            server.ehlo()
+            server.login(settings.SMTP_USERNAME, settings.SMTP_PASSWORD)
+            server.sendmail(settings.FROM_EMAIL, [to_email], msg.as_string())
+        return True
+    except Exception as e:
+        logger.exception("Failed to send OTP email to %s: %s", to_email, e)
+        logger.warning("OTP for %s is %s", to_email, otp)
+        return False
 
 
 def send_restaurant_approval_email(to_email: str, restaurant_name: str) -> None:

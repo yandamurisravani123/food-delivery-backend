@@ -14,5 +14,3 @@ def uuid_column():
         default=uuid.uuid4,
         index=True,
     )
-
-

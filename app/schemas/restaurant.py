@@ -66,6 +66,3 @@ class RestaurantRegisterResponse(BaseModel):
     message: str
     restaurant_id: UUID
     status: str
-
-
-

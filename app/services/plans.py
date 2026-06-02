@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from app.models.plan import Plan
+from app.models.plans import Plan
  
  
 class PlanService:
@@ -59,3 +59,4 @@ class PlanService:
         return {
             "message": "Plan Deleted"
         }
+ 

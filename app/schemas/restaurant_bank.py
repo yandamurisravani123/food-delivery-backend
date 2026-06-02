@@ -1,10 +1,9 @@
-from uuid import UUID
 from pydantic import BaseModel, Field
 
 
 class RestaurantBankRequest(BaseModel):
 
-    restaurant_id: UUID
+    restaurant_id: str
 
     bank_account_holder: str = Field(...)
 

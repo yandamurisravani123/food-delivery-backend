@@ -5,7 +5,8 @@ from app.models.password_token import PasswordResetToken
 from app.models.user import User
 from app.models.restaurant import Restaurant
 from app.models.delivery import DeliveryAgent
-from uuid import UUID
+
+
 class AuthRepository:
     @staticmethod
     async def get_user_by_email(session: AsyncSession, email: str):
@@ -13,7 +14,7 @@ class AuthRepository:
         return result.scalar_one_or_none()
 
     @staticmethod
-    async def get_user_by_id(session: AsyncSession, user_id: UUID):
+    async def get_user_by_id(session: AsyncSession, user_id: int):
         result = await session.execute(select(User).where(User.id == user_id))
         return result.scalar_one_or_none()
 
