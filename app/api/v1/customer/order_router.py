@@ -33,7 +33,6 @@ async def create_order(
     new_order = Order(
         user_id=payload.user_id,
         restaurant_id=payload.restaurant_id,
-        items=items_data,
         delivery_address=payload.delivery_address,
         special_instructions=payload.special_instructions,
         cutlery_required=payload.cutlery_required

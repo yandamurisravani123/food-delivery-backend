@@ -1,6 +1,3 @@
-
-
- 
 from sqlalchemy import Column, String, DateTime, Numeric
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.sql import func
@@ -15,4 +12,4 @@ class Wallet(Base):
     user_id = Column(UUID(as_uuid=True), nullable=False, unique=True)
     balance = Column(Numeric, default=0)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
- 
+
