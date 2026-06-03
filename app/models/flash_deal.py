@@ -1,0 +1,15 @@
+from sqlalchemy import Column, Integer, String
+from app.config.database import Base
+
+
+class FlashDeal(Base):
+
+    __tablename__ = "flash_deals"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    title = Column(String)
+
+    image = Column(String)
+
+    discount = Column(String)

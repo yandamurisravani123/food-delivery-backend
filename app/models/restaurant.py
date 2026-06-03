@@ -1,72 +1,223 @@
 import uuid
 
-from sqlalchemy import UUID, Column, Integer, String, Boolean, DateTime, ForeignKey, Float, func
-from sqlalchemy.orm import mapped_column
-from app.config.database import Base
-import uuid
+from alembic.environment import Optional
+from pydantic import Field
+from sqlalchemy import (
+    Column,
+    String,
+    Boolean,
+    DateTime,
+    ForeignKey,
+    Float
+)
+
+from sqlalchemy.sql import func
+
 from sqlalchemy.dialects.postgresql import UUID
+
+from app.config.database import Base
 
 
 class Restaurant(Base):
+
     __tablename__ = "restaurants"
 
-    id = mapped_column(
+    
+    # Primary Key
+   
+    id = Column(
         UUID(as_uuid=True),
         primary_key=True,
         default=uuid.uuid4,
-        index=True,
+        index=True
     )
 
-    restaurant_name = Column(String(150), nullable=False, index=True)
-    owner_name = Column(String(100), nullable=False)
-    owner_email = Column(String(255), nullable=False, index=True)
-    owner_phone = Column(String(20), nullable=False)
-    password_hash = Column(String(255), nullable=False)
-
-    restaurant_phone = Column(String(20), nullable=False)
-    cuisine_types = Column(String(255), nullable=True)
-
-    address_line1 = Column(String(255), nullable=False)
-    address_line2 = Column(String(255), nullable=True)
-    city = Column(String(100), nullable=False, index=True)
-    state = Column(String(100), nullable=False)
-    pincode = Column(String(20), nullable=False)
-
-    latitude = Column(Float, nullable=True)
-    longitude = Column(Float, nullable=True)
-
-    opening_time = Column(String(20), nullable=True)
-    closing_time = Column(String(20), nullable=True)
-
-    gst_number = Column(String(50), nullable=True)
-    fssai_number = Column(String(50), nullable=True)
-    logo_url = Column(String(255), nullable=True)
-
-    is_draft = Column(Boolean, default=True)
-
-    status = Column(String(20), nullable=False, default="pending")  # pending / approved / rejected
-    is_active = Column(Boolean, nullable=False, default=False)
-
-    approved_by = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
-    approved_at = Column(DateTime(timezone=True), nullable=True)
-
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+   
+    # Basic Restaurant Details
     
-    logo_url = Column(String(255), nullable=True)
+    restaurant_name = Column(
+        String(150),
+        nullable=False,
+        index=True
+    )
 
-    bank_account_holder = Column(String(150), nullable=True)
+    logo_url: Optional[str] = Field(default=None, max_length=255)
 
-bank_account_number = Column(String(50), nullable=True)
+    cuisine_types = Column(
+        String(255),
+        nullable=True
+    )
 
-ifsc_code = Column(String(20), nullable=True)
+    rating = Column(
+        Float,
+        default=0.0
+    )
 
-is_draft = Column(Boolean, default=True)
+    
+    # Owner Details
+   
 
-gst_certificate = Column(String(255), nullable=True)
+    owner_name = Column(
+        String(100),
+        nullable=False
+    )
 
-fssai_license_file = Column(String(255), nullable=True)
+    owner_email = Column(
+        String(255),
+        nullable=False,
+        unique=True,
+        index=True
+    )
 
-cancelled_cheque = Column(String(255), nullable=True)
+    owner_phone = Column(
+        String(20),
+        nullable=False
+    )
+
+    password_hash = Column(
+        String(255),
+        nullable=False
+    )
+
+    
+    # Restaurant Contact
 
 
+    restaurant_phone = Column(
+        String(20),
+        nullable=False
+    )
+
+    
+    # Address Details
+    
+
+    address_line1 = Column(
+        String(255),
+        nullable=False
+    )
+
+    address_line2 = Column(
+        String(255),
+        nullable=True
+    )
+
+    city = Column(
+        String(100),
+        nullable=False,
+        index=True
+    )
+
+    state = Column(
+        String(100),
+        nullable=False
+    )
+
+    pincode = Column(
+        String(20),
+        nullable=False
+    )
+
+    
+    # Full Address
+    
+
+    address = Column(
+        String(500),
+        nullable=True
+    )
+
+   
+    # Geo Location
+    
+
+    latitude = Column(
+        Float,
+        nullable=True
+    )
+
+    longitude = Column(
+        Float,
+        nullable=True
+    )
+
+    
+    # Restaurant Timings
+    
+
+    opening_time = Column(
+        String(20),
+        nullable=True
+    )
+
+    closing_time = Column(
+        String(20),
+        nullable=True
+    )
+
+    
+    # Legal Details
+  
+
+    gst_number = Column(
+        String(50),
+        nullable=True
+    )
+
+    fssai_number = Column(
+        String(50),
+        nullable=True
+    )
+
+   
+    # Restaurant Status
+    
+
+    status = Column(
+        String(20),
+        nullable=False,
+        default="pending"
+    )
+
+    is_active = Column(
+        Boolean,
+        nullable=False,
+        default=False
+    )
+
+    
+    # Home Page Flags
+
+    is_trending = Column(
+        Boolean,
+        default=False
+    )
+
+    is_top_rated = Column(
+        Boolean,
+        default=False
+    )
+
+    
+    # Approval Details
+   
+
+    approved_by = Column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id"),
+        nullable=True
+    )
+
+    # Timestamps
+    
+
+    created_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now()
+    )
+
+    updated_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now()
+    )
