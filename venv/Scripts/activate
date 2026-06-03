@@ -35,7 +35,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="C:\Users\HP\Desktop\food_delivery_backend\food_delivery_backend\food_delivery\venv"
+VIRTUAL_ENV="C:\Users\adaka\OneDrive\Documents\GitHub\food-delivery-backend\venv"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"
