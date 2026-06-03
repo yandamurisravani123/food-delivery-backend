@@ -13,6 +13,7 @@ class User(Base):
         default=uuid.uuid4,
         index=True
     )
+
     full_name = Column(String(120), nullable=False)
     email = Column(String(255), unique=True, index=True, nullable=False)
     phone = Column(String(20), unique=True, index=True, nullable=True)

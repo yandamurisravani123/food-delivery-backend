@@ -20,7 +20,7 @@ class Order(Base):
     __tablename__ = "orders"
  
     id = mapped_column(Integer, primary_key=True, autoincrement=True)
-    user_id = mapped_column(UUID(as_uuid=True), nullable=False, index=True)
+    user_id = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True)
     restaurant_id = mapped_column(UUID(as_uuid=True), nullable=True, index=True)
  
     food_name = Column(String(255), nullable=True)
@@ -35,6 +35,7 @@ class Order(Base):
     prep_time = Column(Integer, nullable=False, default=0)
     is_urgent = Column(Boolean, nullable=False, default=False)
  
+ 
     delivery_address = Column(Text, nullable=True)
     courier_name = Column(String(255), nullable=True)
     courier_rating = Column(String(50), nullable=True)
@@ -46,6 +47,8 @@ class Order(Base):
     delivery_fee = Column(Float, nullable=False, default=0.0)
     tax_percent = Column(Float, nullable=False, default=0.0)
     total = Column(Float, nullable=False, default=0.0)
+
+    user = relationship("User", back_populates="orders")
  
     items = relationship("OrderItem", back_populates="order", cascade="all, delete-orphan")
  
