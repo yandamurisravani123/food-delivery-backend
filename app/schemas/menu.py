@@ -1,8 +1,12 @@
 from pydantic import BaseModel
 
 
-class MenuItemResponse(BaseModel):
+class MenuResponse(BaseModel):
 
-    message: str
+    id: int
+    name: str
+    price: float
+    image: str
 
-    item_id: str
+    class Config:
+        from_attributes = True

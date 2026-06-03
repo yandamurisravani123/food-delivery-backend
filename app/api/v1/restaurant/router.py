@@ -1,12 +1,19 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-import pandas as pd
 from fastapi import UploadFile, File, Form
+import csv
+import io
+
+try:
+    import pandas as pd
+    _pandas_available = True
+except ImportError:
+    _pandas_available = False
 import os
 import shutil
 from app.config.database import get_db
 from app.models.restaurant import Restaurant
-from app.models.menu import MenuItem
+from app.models.menu_item import MenuItem
 from app.schemas.restaurant_bank import RestaurantBankRequest
 from app.models.combo import MealCombo
 from app.models.customization import (
@@ -282,11 +289,16 @@ def bulk_upload_menu(
     with open(temp_file, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
-    df = pd.read_csv(temp_file)
-
     created_items = []
 
-    for _, row in df.iterrows():
+    if _pandas_available:
+        df = pd.read_csv(temp_file)
+        rows = [row for _, row in df.iterrows()]
+    else:
+        with open(temp_file, newline="", encoding="utf-8") as f:
+            rows = list(csv.DictReader(f))
+
+    for row in rows:
 
         item = MenuItem(
 
@@ -354,30 +366,7 @@ def get_restaurant_menu(
 
     return grouped_menu
 
-@router.put("/menu/item/{item_id}/stock")
-def update_stock_status(
-    item_id: str,
-    is_available: bool,
-    db: Session = Depends(get_db)
-):
 
-    item = db.query(MenuItem).filter(
-        MenuItem.id == item_id
-    ).first()
-
-    if not item:
-        return {
-            "error": "Menu item not found"
-        }
-
-    item.is_available = is_available
-
-    db.commit()
-
-    return {
-        "message": "Stock updated successfully"
-    }
-    
 @router.put("/menu/item/{item_id}/stock")
 def update_stock_status(
     item_id: str,

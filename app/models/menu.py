@@ -1,44 +1,56 @@
-from sqlalchemy import Column, String, Float, Boolean, ForeignKey
-from sqlalchemy.dialects.postgresql import UUID
-from app.config.database import Base
 import uuid
 
+from sqlalchemy import (
+    Column,
+    String,
+    Float,
+    ForeignKey
+)
 
-class MenuItem(Base):
+from sqlalchemy.dialects.postgresql import UUID
 
-    __tablename__ = "menu_items"
+from app.config.database import Base
+
+
+class Menu(Base):
+
+    __tablename__ = "menus"
+
+    
+    # Primary Key
+    
 
     id = Column(
         UUID(as_uuid=True),
         primary_key=True,
-        default=uuid.uuid4
+        default=uuid.uuid4,
+        index=True
     )
 
+    
+    # Restaurant Foreign Key
+    
     restaurant_id = Column(
         UUID(as_uuid=True),
-        ForeignKey("restaurants.id")
+        ForeignKey("restaurants.id"),
+        nullable=False
     )
 
-    item_name = Column(String(255), nullable=False)
-
-    description = Column(String(1000), nullable=True)
-
-    category = Column(String(100), nullable=True)
-
-    base_price = Column(Float, nullable=False)
-
-    tags = Column(String(255), nullable=True)
-
-    tax_rate = Column(String(50), nullable=True)
-
-    track_stock = Column(Boolean, default=True)
-
-    combo_available = Column(Boolean, default=False)
-
-    image_url = Column(String(255), nullable=True)
     
-    is_available = Column(Boolean, default=True)
+    # Menu Details
     
-    track_stock = Column(Boolean, default=True)
-    
-    tax_category = Column(String(100), nullable=True)
+
+    name = Column(
+        String(255),
+        nullable=False
+    )
+
+    price = Column(
+        Float,
+        nullable=False
+    )
+
+    image = Column(
+        String(255),
+        nullable=True
+    )
