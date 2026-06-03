@@ -4,21 +4,28 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config.database import get_db
-from app.core.dependencies import get_current_user, require_super_admin
+from app.core.dependencies import require_super_admin
 from app.models.user import User
+
 from app.schemas.driver import DriverOut, MessageResponse
 from app.schemas.restaurant import (
     RestaurantApprovalResponse,
     RestaurantOut,
-    RestaurantRegisterRequest,
 )
+
 from app.services.driver_service import DriverService
 from app.services.restaurant_service import RestaurantService
 
-router = APIRouter(prefix="/Super_admin", tags=["Super Admin"])
+
+router = APIRouter(
+    prefix="/Super_admin",
+    tags=["Super Admin"]
+)
 
 
-
+# ==============================
+# PENDING RESTAURANTS
+# ==============================
 
 @router.get("/pending", response_model=list[RestaurantOut])
 async def pending_restaurants(
@@ -28,7 +35,7 @@ async def pending_restaurants(
     return await RestaurantService.get_pending_restaurants(session)
 
 
-@router.post("/{restaurant_id}/approve", response_model=RestaurantApprovalResponse)
+@router.post("/{restaurant_id}/approve")
 async def approve_restaurant(
     restaurant_id: UUID,
     session: AsyncSession = Depends(get_db),
@@ -39,8 +46,10 @@ async def approve_restaurant(
         restaurant_id=restaurant_id,
         approved_by=current_user.id,
     )
+
     return {
-        "message": "Restaurant approved successfully"
+        "message": "Restaurant approved successfully",
+        "restaurant_id": str(restaurant_id)
     }
 
 
@@ -50,14 +59,16 @@ async def reject_restaurant(
     session: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_super_admin),
 ):
-    restaurant = await RestaurantService.reject_restaurant(
+    await RestaurantService.reject_restaurant(
         session=session,
         restaurant_id=restaurant_id,
         approved_by=current_user.id,
     )
+
     return {
-        "message": "Restaurant rejected successfully",
+        "message": "Restaurant rejected successfully"
     }
+
 
 # ==============================
 # RESTAURANTS
@@ -66,7 +77,7 @@ async def reject_restaurant(
 @router.get("/restaurants", response_model=list[RestaurantOut])
 async def get_all_restaurants(
     session: AsyncSession = Depends(get_db),
-    current_user=Depends(require_super_admin),
+    current_user: User = Depends(require_super_admin),
 ):
     return await RestaurantService.get_all(session)
 
@@ -75,12 +86,17 @@ async def get_all_restaurants(
 async def get_restaurant_by_id(
     restaurant_id: UUID,
     session: AsyncSession = Depends(get_db),
-    current_user=Depends(require_super_admin),
+    current_user: User = Depends(require_super_admin),
 ):
     return await RestaurantService.get_by_id(
         session,
         restaurant_id,
     )
+
+
+# ==============================
+# DELIVERY AGENTS
+# ==============================
 
 @router.get("/pending-delivery", response_model=list[DriverOut])
 async def pending_delivery_agents(
@@ -123,14 +139,11 @@ async def reject_delivery_agent(
         "message": "Delivery agent rejected successfully"
     }
 
-# ==============================
-# DELIVERY AGENTS
-# ==============================
 
 @router.get("/delivery-agents", response_model=list[DriverOut])
 async def get_all_delivery_agents(
     session: AsyncSession = Depends(get_db),
-    current_user=Depends(require_super_admin),
+    current_user: User = Depends(require_super_admin),
 ):
     return await DriverService.get_all_delivery_agents(session)
 
@@ -139,7 +152,7 @@ async def get_all_delivery_agents(
 async def get_delivery_agent_by_id(
     delivery_agent_id: UUID,
     session: AsyncSession = Depends(get_db),
-    current_user=Depends(require_super_admin),
+    current_user: User = Depends(require_super_admin),
 ):
     return await DriverService.get_delivery_agent_by_id(
         session,
