@@ -1,65 +1,120 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
+ 
 from sqlalchemy import select
-
+from sqlalchemy.ext.asyncio import AsyncSession
+ 
 from app.config.database import get_db
 from app.models.order import Order
-from app.models.user import User
-from app.schemas.order import (
-    OrderCreate,
-    OrderResponse
-)
-
+from app.schemas.order import OrderCreate
+ 
+ 
 router = APIRouter(
     prefix="/orders",
     tags=["Orders"]
 )
-
-
-@router.post("/", response_model=OrderResponse)
+ 
+ 
+# CREATE ORDER
+@router.post("/")
 async def create_order(
-    order: OrderCreate,
+    payload: OrderCreate,
     db: AsyncSession = Depends(get_db)
 ):
-    try:
-        # check user exists
-        user = await db.get(User, order.user_id)
-
-        if not user:
-            raise HTTPException(
-                status_code=404,
-                detail="User not found"
-            )
-
-        new_order = Order(
-            user_id=order.user_id,
-            food_name=order.food_name,
-            cuisine=order.cuisine,
-            order_time=order.order_time
-        )
-
-        db.add(new_order)
-
-        await db.commit()
-        await db.refresh(new_order)
-
-        return new_order
-
-    except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=str(e)
-        )
-
-
-@router.get("/", response_model=list[OrderResponse])
+ 
+    items_data = []
+ 
+    for item in payload.items:
+        items_data.append({
+            "name": item.name,
+            "quantity": item.quantity,
+            "price": item.price
+        })
+ 
+    new_order = Order(
+        user_id=payload.user_id,
+        restaurant_id=payload.restaurant_id,
+        delivery_address=payload.delivery_address,
+        special_instructions=payload.special_instructions,
+        cutlery_required=payload.cutlery_required
+    )
+ 
+    db.add(new_order)
+ 
+    await db.commit()
+ 
+    await db.refresh(new_order)
+ 
+    return {
+        "message": "Order created successfully",
+        "data": new_order
+    }
+ 
+ 
+# GET ALL ORDERS
+@router.get("/")
 async def get_orders(
     db: AsyncSession = Depends(get_db)
 ):
+ 
     result = await db.execute(
         select(Order)
     )
-
+ 
     orders = result.scalars().all()
-
+ 
     return orders
+ 
+ 
+# GET SINGLE ORDER
+@router.get("/{order_id}")
+async def get_single_order(
+    order_id: int,
+    db: AsyncSession = Depends(get_db)
+):
+ 
+    result = await db.execute(
+        select(Order).where(
+            Order.id == order_id
+        )
+    )
+ 
+    order = result.scalar()
+ 
+    if not order:
+        raise HTTPException(
+            status_code=404,
+            detail="Order not found"
+        )
+ 
+    return order
+ 
+ 
+# DELETE ORDER
+@router.delete("/{order_id}")
+async def delete_order(
+    order_id: int,
+    db: AsyncSession = Depends(get_db)
+):
+ 
+    result = await db.execute(
+        select(Order).where(
+            Order.id == order_id
+        )
+    )
+ 
+    order = result.scalar()
+ 
+    if not order:
+        raise HTTPException(
+            status_code=404,
+            detail="Order not found"
+        )
+ 
+    await db.delete(order)
+ 
+    await db.commit()
+ 
+    return {
+        "message": "Order deleted successfully"
+    }
+ 

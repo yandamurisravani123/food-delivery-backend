@@ -23,9 +23,7 @@ router = APIRouter(
 )
 
 
-# ==============================
 # PENDING RESTAURANTS
-# ==============================
 
 @router.get("/pending", response_model=list[RestaurantOut])
 async def pending_restaurants(
@@ -70,9 +68,7 @@ async def reject_restaurant(
     }
 
 
-# ==============================
 # RESTAURANTS
-# ==============================
 
 @router.get("/restaurants", response_model=list[RestaurantOut])
 async def get_all_restaurants(
@@ -94,9 +90,7 @@ async def get_restaurant_by_id(
     )
 
 
-# ==============================
 # DELIVERY AGENTS
-# ==============================
 
 @router.get("/pending-delivery", response_model=list[DriverOut])
 async def pending_delivery_agents(
