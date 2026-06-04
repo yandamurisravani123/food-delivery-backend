@@ -4,7 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config.database import get_db
-from app.models.order import Order
+from app.models.order import Order, OrderItem
 from app.schemas.order import OrderCreate
 
 
@@ -23,10 +23,19 @@ async def create_order(
 
     new_order = Order(
         user_id=payload.user_id,
-        food_name=payload.food_name,
-        cuisine=payload.cuisine,
-        order_time=payload.order_time
+        restaurant_id=payload.restaurant_id,
+        delivery_address=payload.delivery_address,
+        special_instructions=payload.special_instructions,
+        cutlery_required=payload.cutlery_required,
     )
+
+    # create OrderItem objects from payload items
+    items = [
+        OrderItem(name=item.name, quantity=item.quantity, price=item.price)
+        for item in payload.items
+    ]
+
+    new_order.items = items
 
     db.add(new_order)
 

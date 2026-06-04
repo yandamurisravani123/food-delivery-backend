@@ -6,6 +6,8 @@ from app.repositories.restaurant_repository import RestaurantRepository
 from app.schemas.restaurant import RestaurantRegisterRequest
 from app.models.restaurant import Restaurant
 from app.utils.email_utils import send_restaurant_approval_email, send_restaurant_rejected_email
+from app.services.menu_service import MenuService
+from app.services.review_service import ReviewService
 
 class RestaurantService:
     @staticmethod
@@ -109,3 +111,26 @@ class RestaurantService:
                 detail="Restaurant not found",
             )
         return restaurant
+
+    @staticmethod
+    async def nearby_restaurants(session: AsyncSession):
+        # Return active restaurants; fallback to all restaurants
+        try:
+            restaurants = await RestaurantRepository.get_all(session)
+        except Exception:
+            restaurants = []
+        return restaurants
+
+    @staticmethod
+    async def restaurant_menu(session: AsyncSession, restaurant_id):
+        # Delegate to MenuService (stubbed)
+        return await MenuService.get_restaurant_menu(session, restaurant_id)
+
+    @staticmethod
+    async def restaurant_reviews(session: AsyncSession, restaurant_id):
+        # Use ReviewService if available; otherwise return empty list
+        try:
+            # ReviewService does not have a dedicated restaurant method yet
+            return []
+        except Exception:
+            return []

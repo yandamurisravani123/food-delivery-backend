@@ -19,7 +19,7 @@ class OrderStatus(str, Enum):
 class Order(Base):
     __tablename__ = "orders"
 
-    id = mapped_column(Integer, primary_key=True, autoincrement=True)
+    id = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     user_id = mapped_column(UUID(as_uuid=True), nullable=False, index=True)
     restaurant_id = mapped_column(UUID(as_uuid=True), nullable=True, index=True)
 
@@ -51,10 +51,10 @@ class Order(Base):
 
 
 class OrderItem(Base):
-    __tablename__ = "order_items"
+    __tablename__ = "orders_items"
 
     id = mapped_column(Integer, primary_key=True, autoincrement=True)
-    order_id = mapped_column(Integer, ForeignKey("orders.id"), nullable=False, index=True)
+    order_id = mapped_column(UUID(as_uuid=True), ForeignKey("orders.id"), nullable=False, index=True)
     name = Column(String(255), nullable=False)
     quantity = Column(Integer, nullable=False, default=1)
     price = Column(Float, nullable=False, default=0.0)

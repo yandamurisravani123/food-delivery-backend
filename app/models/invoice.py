@@ -30,7 +30,7 @@ class Invoice(Base):
 
     # FIXED
     order_id = Column(
-        Integer,
+        UUID(as_uuid=True),
         ForeignKey("orders.id"),
         nullable=False
     )

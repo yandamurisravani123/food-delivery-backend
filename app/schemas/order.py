@@ -11,7 +11,7 @@ class OrderItemCreate(BaseModel):
 
 
 class OrderItemResponse(BaseModel):
-    order_id: int
+    order_id: UUID
     name: str
     quantity: int
     price: float
@@ -30,7 +30,7 @@ class OrderCreate(BaseModel):
 
 
 class OrderResponse(BaseModel):
-    order_id: int
+    order_id: UUID
     user_id: UUID
     restaurant_id: UUID
     items: List[OrderItemResponse]

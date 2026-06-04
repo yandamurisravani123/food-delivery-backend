@@ -8,7 +8,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.config.database import get_db
 from app.config.security import token_fingerprint
 from app.config.settings import settings
-from app.core.redis_client import redis_get
+from app.core.redis_client import redis_client
+from redis.exceptions import RedisError
 from app.repositories.auth_repository import AuthRepository
 from app.models.user import User
 
@@ -34,7 +35,12 @@ async def get_current_user(
         )
 
     token_key = f"blacklist:{token_fingerprint(token)}"
-    if await redis_get(token_key):
+    try:
+        is_blacklisted = await redis_client.get(token_key)
+    except RedisError:
+        is_blacklisted = False
+
+    if is_blacklisted:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token has been logged out",

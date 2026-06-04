@@ -6,7 +6,7 @@ import os
 import shutil
 from app.config.database import get_db
 from app.models.restaurant import Restaurant
-from app.models.menu import MenuItem
+from app.models.menu_item import MenuItem
 from app.schemas.restaurant_bank import RestaurantBankRequest
 from app.models.combo import MealCombo
 from app.models.customization import (

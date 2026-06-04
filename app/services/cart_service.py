@@ -3,7 +3,7 @@ from sqlalchemy import select
 from fastapi import HTTPException
 
 from app.models.cart import Cart
-from app.models.menu import MenuItem
+from app.models.menu_item import MenuItem
 
 
 class CartService:
