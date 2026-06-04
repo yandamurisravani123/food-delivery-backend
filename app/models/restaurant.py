@@ -1,6 +1,7 @@
 import uuid
-from sqlalchemy import Column, String, Boolean, DateTime, ForeignKey, Float, func
-from sqlalchemy.orm import mapped_column
+from sqlalchemy import Column, String, Boolean, DateTime, ForeignKey, Float, func,Integer,Text
+from sqlalchemy.orm import mapped_column,relationship
+from datetime import datetime
 from sqlalchemy.dialects.postgresql import UUID
 from app.config.database import Base
 
@@ -55,6 +56,84 @@ class Restaurant(Base):
     gst_certificate = Column(String(255), nullable=True)
     fssai_license_file = Column(String(255), nullable=True)
     cancelled_cheque = Column(String(255), nullable=True)
+    
+    
+    orders = relationship("Order", back_populates="restaurant")
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    
+    
+   
+
+
+ 
+class Ingredient(Base):
+    __tablename__ = "ingredients"
+ 
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    restaurant_id = Column(UUID(as_uuid=True), nullable=False)
+    ingredient_name = Column(String)
+    category = Column(String)
+    stock_units = Column(Float)
+    unit = Column(String)
+    min_threshold = Column(Float, default=10)
+    current_price = Column(Float)
+    last_price = Column(Float)
+    price_change = Column(Float)
+    is_out_of_stock = Column(Boolean, default=False)
+    minimum_stock = Column(Float, default=10)
+    is_low_stock = Column(Boolean, default=False)
+    last_updated = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+ 
+    waste_logs = relationship("IngredientWaste", back_populates="ingredient")
+ 
+ 
+class IngredientWaste(Base):
+    __tablename__ = "ingredient_waste"
+ 
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)  
+    ingredient_id = Column(UUID(as_uuid=True), ForeignKey("ingredients.id"))
+    units_spoiled = Column(Integer)
+    reason = Column(Text)
+    loss_amount = Column(Float)
+    created_at = Column(DateTime, default=datetime.utcnow)
+ 
+    ingredient = relationship("Ingredient", back_populates="waste_logs")
+ 
+ 
+class MenuIngredient(Base):
+    __tablename__ = "menu_ingredients"
+ 
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    menu_item_id = Column(UUID(as_uuid=True), ForeignKey("menu_items.id"))
+    ingredient_id = Column(UUID(as_uuid=True), ForeignKey("ingredients.id"))
+    quantity_required = Column(Float)
+ 
+ 
+class InventoryAdjustment(Base):
+    __tablename__ = "inventory_adjustments"
+ 
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    ingredient_id = Column(UUID(as_uuid=True))
+    ingredient_name = Column(String)
+    previous_quantity = Column(Float)
+    new_quantity = Column(Float)
+    reason = Column(String)
+    updated_by = Column(String)
+    created_at = Column(DateTime, default=datetime.utcnow)
+ 
+ 
+class InventoryAlert(Base):
+    __tablename__ = "inventory_alerts"
+ 
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    restaurant_id = Column(UUID(as_uuid=True), ForeignKey("restaurants.id"))
+    ingredient_id = Column(UUID(as_uuid=True), ForeignKey("ingredients.id"))
+    alert_type = Column(String)
+    message = Column(String)
+    current_stock = Column(Float)
+    threshold_value = Column(Float)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+  
+    
