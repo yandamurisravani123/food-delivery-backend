@@ -7,9 +7,7 @@ from sqlalchemy import text
 from app.config.database import Base, engine
 from app.core.redis_client import connect_redis, close_redis
 
-# =====================================================
 # AUTO-IMPORT ALL MODELS (so SQLAlchemy registers all tables)
-# =====================================================
 
 models_dir = Path(__file__).resolve().parent / "models"
 for model_file in sorted(models_dir.glob("*.py")):
@@ -20,24 +18,16 @@ for model_file in sorted(models_dir.glob("*.py")):
             print(f"Warning: could not import model {model_file.stem}: {e}")
 
 
-# =====================================================
 # ROUTERS — Auth
-# =====================================================
 from app.api.v1.auth import router as auth_router
 
-# =====================================================
 # ROUTERS — Admin
-# =====================================================
 from app.api.v1.admin.super_admin import router as super_admin_router
 
-# =====================================================
 # ROUTERS — Restaurant
-# =====================================================
 from app.api.v1.restaurant.router import router as restaurant_router
 
-# =====================================================
 # ROUTERS — Base Customer (home, search, cuisine, etc.)
-# =====================================================
 from app.api.v1.customer.home import router as home_router
 from app.api.v1.customer.search import router as search_router
 from app.api.v1.customer.restaurant import router as customer_restaurant_router
@@ -91,9 +81,7 @@ from app.api.v1.customer.customer_discovery import router as customer_discovery_
 from app.api.v1.customer.customer_rating import router as customer_rating_router
 
 
-# =====================================================
 # APP LIFESPAN
-# =====================================================
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -106,6 +94,12 @@ async def lifespan(app: FastAPI):
             "ALTER TABLE orders ADD COLUMN IF NOT EXISTS status VARCHAR(50) NOT NULL DEFAULT 'pending'",
             "ALTER TABLE orders ADD COLUMN IF NOT EXISTS created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()",
             "ALTER TABLE orders ADD COLUMN IF NOT EXISTS order_time TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()",
+            "ALTER TABLE orders DROP COLUMN IF EXISTS user_id",
+            "ALTER TABLE orders DROP COLUMN IF EXISTS restaurant_id",
+            "ALTER TABLE orders ADD COLUMN IF NOT EXISTS user_id UUID",
+            "ALTER TABLE orders ADD COLUMN IF NOT EXISTS restaurant_id UUID",
+            "ALTER TABLE orders ADD COLUMN IF NOT EXISTS food_name VARCHAR(255)",
+            "ALTER TABLE orders ADD COLUMN IF NOT EXISTS cuisine VARCHAR(100)",
             "ALTER TABLE orders ADD COLUMN IF NOT EXISTS start_time TIMESTAMP WITH TIME ZONE",
             "ALTER TABLE orders ADD COLUMN IF NOT EXISTS completed_at TIMESTAMP WITH TIME ZONE",
             "ALTER TABLE orders ADD COLUMN IF NOT EXISTS prep_time INTEGER NOT NULL DEFAULT 0",
@@ -120,6 +114,9 @@ async def lifespan(app: FastAPI):
             "ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_fee DOUBLE PRECISION NOT NULL DEFAULT 0.0",
             "ALTER TABLE orders ADD COLUMN IF NOT EXISTS tax_percent DOUBLE PRECISION NOT NULL DEFAULT 0.0",
             "ALTER TABLE orders ADD COLUMN IF NOT EXISTS total DOUBLE PRECISION NOT NULL DEFAULT 0.0",
+            "ALTER TABLE restaurants ADD COLUMN IF NOT EXISTS is_trending BOOLEAN NOT NULL DEFAULT FALSE",
+            "ALTER TABLE restaurants ADD COLUMN IF NOT EXISTS is_top_rated BOOLEAN NOT NULL DEFAULT FALSE",
+            "ALTER TABLE restaurants ADD COLUMN IF NOT EXISTS approved_at TIMESTAMP WITH TIME ZONE",
         ]
         for stmt in alter_statements:
             try:
@@ -141,9 +138,7 @@ async def lifespan(app: FastAPI):
     print("✅ Redis Disconnected")
 
 
-# =====================================================
 # FASTAPI APP
-# =====================================================
 
 app = FastAPI(
     title="Food Delivery Backend",
@@ -154,9 +149,7 @@ app = FastAPI(
 )
 
 
-# =====================================================
 # INCLUDE ALL ROUTERS
-# =====================================================
 
 # Auth
 app.include_router(auth_router, prefix="/api/v1")

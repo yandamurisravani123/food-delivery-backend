@@ -32,6 +32,20 @@ async def create_notification(
     db: AsyncSession = Depends(get_db)
 ):
 
+    result = await db.execute(
+        select(Order).where(
+            Order.id == order_id
+        )
+    )
+
+    order = result.scalar_one_or_none()
+
+    if not order:
+        raise HTTPException(
+            status_code=404,
+            detail="Order not found"
+        )
+
     notification = DeliveryNotification(
         user_id=user_id,
         order_id=order_id,

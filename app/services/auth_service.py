@@ -162,14 +162,31 @@ class AuthService:
 
     @staticmethod
     async def login(session: AsyncSession, payload: LoginRequest):
-        user = await AuthRepository.get_user_by_email(session, payload.email)
+        user = await AuthRepository.get_user_by_email(
+            session,
+            payload.email
+        )
+        
         if user:
-            if not verify_password(payload.password, user.hashed_password):
+            print("===================================")
+            print("EMAIL:", user.email)
+            print("HASH:", repr(user.hashed_password))
+            print("===================================")
+            
+            if not user.hashed_password:
+                raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Password hash is empty"
+                )
+            
+            if not verify_password(
+                payload.password,
+                user.hashed_password
+            ):
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail="Invalid email or password",
                 )
-
             token = create_access_token(
                 data={
                     "sub": str(user.id),
@@ -178,7 +195,6 @@ class AuthService:
                     "entity_type": "user",
                 }
             )
-
             return TokenResponse(
                 access_token=token,
                 token_type="bearer",
@@ -190,79 +206,6 @@ class AuthService:
                     status="active" if user.is_active else "inactive",
                 ),
             )
-
-        restaurant = await AuthRepository.get_restaurant_by_email(session, payload.email)
-        if restaurant:
-            if not verify_password(payload.password, restaurant.password_hash):
-                raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Invalid email or password",
-                )
-
-            if restaurant.status != "approved":
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail="Restaurant is not approved yet",
-                )
-
-            token = create_access_token(
-                data={
-                    "sub": str(restaurant.id),
-                    "email": restaurant.owner_email,
-                    "role": "restaurant",
-                    "entity_type": "restaurant",
-                }
-            )
-
-            return TokenResponse(
-                access_token=token,
-                token_type="bearer",
-                user=UserOut(
-                    id=restaurant.id,
-                    name=restaurant.restaurant_name,
-                    email=restaurant.owner_email,
-                    role="restaurant",
-                    status=restaurant.status,
-                ),
-            )
-
-        delivery_agent = await AuthRepository.get_delivery_agent_by_email(
-            session, payload.email
-        )
-        if delivery_agent:
-            if not verify_password(payload.password, delivery_agent.password_hash):
-                raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Invalid email or password",
-                )
-
-            if delivery_agent.status != "approved":
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail="Delivery agent is not approved yet",
-                )
-
-            token = create_access_token(
-                data={
-                    "sub": str(delivery_agent.id),
-                    "email": delivery_agent.email,
-                    "role": "delivery_agent",
-                    "entity_type": "delivery_agent",
-                }
-            )
-
-            return TokenResponse(
-                access_token=token,
-                token_type="bearer",
-                user=UserOut(
-                    id=delivery_agent.id,
-                    name=delivery_agent.full_name,
-                    email=delivery_agent.email,
-                    role="delivery_agent",
-                    status=delivery_agent.status,
-                ),
-            )
-
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password",

@@ -1,5 +1,8 @@
 import random
+from fastapi import HTTPException, status
+from sqlalchemy import select
  
+from app.models.order import Order
 from app.repositories.invoice_repository import (
     InvoiceRepository
 )
@@ -9,6 +12,20 @@ class InvoiceService:
  
     @staticmethod
     async def create_invoice(db, payload):
+ 
+        result = await db.execute(
+            select(Order).where(
+                Order.id == payload.order_id
+            )
+        )
+
+        order = result.scalar_one_or_none()
+
+        if not order:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Order not found"
+            )
  
         subtotal = 0
  

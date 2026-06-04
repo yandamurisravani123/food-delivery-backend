@@ -1,7 +1,6 @@
 import uuid
 
-from alembic.environment import Optional
-from pydantic import Field
+from typing import Optional
 from sqlalchemy import (
     Column,
     String,
@@ -41,16 +40,14 @@ class Restaurant(Base):
         index=True
     )
 
-    logo_url: Optional[str] = Field(default=None, max_length=255)
-
-    cuisine_types = Column(
+    logo_url = Column(
         String(255),
         nullable=True
     )
 
-    rating = Column(
-        Float,
-        default=0.0
+    cuisine_types = Column(
+        String(255),
+        nullable=True
     )
 
     
@@ -118,15 +115,6 @@ class Restaurant(Base):
         nullable=False
     )
 
-    
-    # Full Address
-    
-
-    address = Column(
-        String(500),
-        nullable=True
-    )
-
    
     # Geo Location
     
@@ -190,21 +178,24 @@ class Restaurant(Base):
 
     is_trending = Column(
         Boolean,
+        nullable=False,
         default=False
     )
 
     is_top_rated = Column(
         Boolean,
+        nullable=False,
         default=False
     )
-
-    
-    # Approval Details
-   
 
     approved_by = Column(
         UUID(as_uuid=True),
         ForeignKey("users.id"),
+        nullable=True
+    )
+
+    approved_at = Column(
+        DateTime(timezone=True),
         nullable=True
     )
 

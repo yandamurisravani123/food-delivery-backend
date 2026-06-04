@@ -19,7 +19,9 @@ async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security),
     session: AsyncSession = Depends(get_db),
 ):
-    token = credentials.credentials
+    token = credentials.credentials.strip()
+    if (token.startswith('"') and token.endswith('"')) or (token.startswith("'") and token.endswith("'")):
+        token = token[1:-1]
 
     try:
         payload = jwt.decode(

@@ -55,18 +55,24 @@ def hash_password(password: str) -> str:
 
 
 # Verify password
+from passlib.exc import UnknownHashError
+
 def verify_password(
     plain_password: str,
     hashed_password: str
 ) -> bool:
-    """
-    Verify hashed password.
-    """
-    plain_password = plain_password[:72]
-    return pwd_context.verify(
-        plain_password,
-        hashed_password
-    )
+
+    if not hashed_password:
+        return False
+
+    try:
+        return pwd_context.verify(
+            plain_password[:72],
+            hashed_password
+        )
+    except UnknownHashError:
+        print("INVALID HASH IN DATABASE:", hashed_password)
+        return False
 
 
 # Create JWT access token
