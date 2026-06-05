@@ -1,7 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.menu import Menu
+from app.models.menu_item import MenuItem
 
 
 class MenuRepository:
@@ -12,8 +12,8 @@ class MenuRepository:
         restaurant_id
     ):
         result = await session.execute(
-            select(Menu).where(
-                Menu.restaurant_id == restaurant_id
+            select(MenuItem).where(
+                MenuItem.restaurant_id == restaurant_id
             )
         )
 
