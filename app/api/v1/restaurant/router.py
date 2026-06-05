@@ -1,5 +1,6 @@
-from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 from fastapi import UploadFile, File, Form
 import csv
 import io
@@ -34,7 +35,7 @@ router = APIRouter(
 
 
 @router.post("/onboarding")
-def restaurant_onboarding(
+async def restaurant_onboarding(
 
     restaurant_name: str = Form(...),
 
@@ -56,7 +57,7 @@ def restaurant_onboarding(
 
     logo: UploadFile = File(None),
 
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
 
     logo_filename = None
@@ -89,21 +90,21 @@ def restaurant_onboarding(
 
     db.add(restaurant)
 
-    db.commit()
+    await db.commit()
 
-    db.refresh(restaurant)
+    await db.refresh(restaurant)
 
     return {
         "message": "Restaurant onboarding saved",
-        "restaurant_id": restaurant.id,
+        "restaurant_id": str(restaurant.id),
         "logo": logo_filename
     }
 
 
 @router.post("/bank-details")
-def save_bank_details(
+async def save_bank_details(
     payload: RestaurantBankRequest,
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
 
     if payload.bank_account_number != payload.confirm_account_number:
@@ -111,14 +112,19 @@ def save_bank_details(
             "error": "Account numbers do not match"
         }
 
-    restaurant = db.query(Restaurant).filter(
-        Restaurant.id == payload.restaurant_id
-    ).first()
+    result = await db.execute(
+        select(Restaurant).where(
+            Restaurant.id == payload.restaurant_id
+        )
+    )
+
+    restaurant = result.scalar_one_or_none()
 
     if not restaurant:
-        return {
-            "error": "Restaurant not found"
-        }
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Restaurant not found"
+        )
 
     restaurant.bank_account_holder = payload.bank_account_holder
 
@@ -126,14 +132,14 @@ def save_bank_details(
 
     restaurant.ifsc_code = payload.ifsc_code
 
-    db.commit()
+    await db.commit()
 
     return {
         "message": "Bank details saved successfully"
     }
     
 @router.post("/documents")
-def upload_restaurant_documents(
+async def upload_restaurant_documents(
 
     restaurant_id: str = Form(...),
 
@@ -143,17 +149,22 @@ def upload_restaurant_documents(
 
     cancelled_cheque: UploadFile = File(None),
 
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
 
-    restaurant = db.query(Restaurant).filter(
-        Restaurant.id == restaurant_id
-    ).first()
+    result = await db.execute(
+        select(Restaurant).where(
+            Restaurant.id == restaurant_id
+        )
+    )
+
+    restaurant = result.scalar_one_or_none()
 
     if not restaurant:
-        return {
-            "error": "Restaurant not found"
-        }
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Restaurant not found"
+        )
 
     UPLOAD_DIR = "uploads/documents"
 
@@ -189,14 +200,14 @@ def upload_restaurant_documents(
 
         restaurant.cancelled_cheque = cheque_path
 
-    db.commit()
+    await db.commit()
 
     return {
         "message": "Documents uploaded successfully"
     }
     
 @router.post("/menu/add-item")
-def add_menu_item(
+async def add_menu_item(
 
     restaurant_id: str = Form(...),
 
@@ -218,8 +229,22 @@ def add_menu_item(
 
     food_image: UploadFile = File(None),
 
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
+
+    result = await db.execute(
+        select(Restaurant).where(
+            Restaurant.id == restaurant_id
+        )
+    )
+
+    restaurant = result.scalar_one_or_none()
+
+    if not restaurant:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Restaurant not found"
+        )
 
     UPLOAD_DIR = "uploads/menu"
 
@@ -259,9 +284,9 @@ def add_menu_item(
 
     db.add(item)
 
-    db.commit()
+    await db.commit()
 
-    db.refresh(item)
+    await db.refresh(item)
 
     return {
         "message": "Menu item added successfully",
@@ -269,20 +294,35 @@ def add_menu_item(
     }
     
 @router.post("/menu/bulk-upload")
-def bulk_upload_menu(
+async def bulk_upload_menu(
 
     restaurant_id: str = Form(...),
 
     file: UploadFile = File(...),
 
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
+
+    result = await db.execute(
+        select(Restaurant).where(
+            Restaurant.id == restaurant_id
+        )
+    )
+
+    restaurant = result.scalar_one_or_none()
+
+    if not restaurant:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Restaurant not found"
+        )
 
     if not file.filename.endswith(".csv"):
 
-        return {
-            "error": "Only CSV files are allowed"
-        }
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Only CSV files are allowed"
+        )
 
     temp_file = f"uploads/{file.filename}"
 
@@ -338,14 +378,18 @@ def bulk_upload_menu(
     
     
 @router.get("/menu/{restaurant_id}")
-def get_restaurant_menu(
+async def get_restaurant_menu(
     restaurant_id: str,
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
 
-    items = db.query(MenuItem).filter(
-        MenuItem.restaurant_id == restaurant_id
-    ).all()
+    result = await db.execute(
+        select(MenuItem).where(
+            MenuItem.restaurant_id == restaurant_id
+        )
+    )
+
+    items = result.scalars().all()
 
     grouped_menu = {}
 
@@ -368,54 +412,64 @@ def get_restaurant_menu(
 
 
 @router.put("/menu/item/{item_id}/stock")
-def update_stock_status(
+async def update_stock_status(
     item_id: str,
     is_available: bool,
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
 
-    item = db.query(MenuItem).filter(
-        MenuItem.id == item_id
-    ).first()
+    result = await db.execute(
+        select(MenuItem).where(
+            MenuItem.id == item_id
+        )
+    )
+
+    item = result.scalar_one_or_none()
 
     if not item:
-        return {
-            "error": "Menu item not found"
-        }
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Menu item not found"
+        )
 
     item.is_available = is_available
 
-    db.commit()
+    await db.commit()
 
     return {
         "message": "Stock updated successfully"
     }
     
 @router.delete("/menu/item/{item_id}")
-def delete_menu_item(
+async def delete_menu_item(
     item_id: str,
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
 
-    item = db.query(MenuItem).filter(
-        MenuItem.id == item_id
-    ).first()
+    result = await db.execute(
+        select(MenuItem).where(
+            MenuItem.id == item_id
+        )
+    )
+
+    item = result.scalar_one_or_none()
 
     if not item:
-        return {
-            "error": "Menu item not found"
-        }
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Menu item not found"
+        )
 
-    db.delete(item)
+    await db.delete(item)
 
-    db.commit()
+    await db.commit()
 
     return {
         "message": "Menu item deleted successfully"
     }
     
 @router.post("/combos")
-def create_meal_combo(
+async def create_meal_combo(
 
     restaurant_id: str = Form(...),
 
@@ -429,7 +483,7 @@ def create_meal_combo(
 
     combo_image: UploadFile = File(None),
 
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
 
     UPLOAD_DIR = "uploads/combos"
@@ -462,56 +516,63 @@ def create_meal_combo(
 
     db.add(combo)
 
-    db.commit()
+    await db.commit()
 
-    db.refresh(combo)
+    await db.refresh(combo)
 
     return {
         "message": "Meal combo created successfully",
         "combo_id": combo.id
     }
 @router.get("/combos/{restaurant_id}")
-def get_combos(
+async def get_combos(
     restaurant_id: str,
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
 
-    combos = db.query(MealCombo).filter(
-        MealCombo.restaurant_id == restaurant_id
-    ).all()
+    result = await db.execute(
+        select(MealCombo).where(
+            MealCombo.restaurant_id == restaurant_id
+        )
+    )
 
-    return combos
+    return result.scalars().all()
+
 @router.delete("/combos/{combo_id}")
-
-def delete_combo(
+async def delete_combo(
     combo_id: str,
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
 
-    combo = db.query(MealCombo).filter(
-        MealCombo.id == combo_id
-    ).first()
+    result = await db.execute(
+        select(MealCombo).where(
+            MealCombo.id == combo_id
+        )
+    )
+
+    combo = result.scalar_one_or_none()
 
     if not combo:
-        return {
-            "error": "Combo not found"
-        }
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Combo not found"
+        )
 
-    db.delete(combo)
+    await db.delete(combo)
 
-    db.commit()
+    await db.commit()
 
     return {
         "message": "Combo deleted successfully"
     }
 @router.post("/customization-groups")
-def create_customization_group(
+async def create_customization_group(
 
     restaurant_id: str,
 
     group_name: str,
 
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
 
     group = CustomizationGroup(
@@ -523,16 +584,16 @@ def create_customization_group(
 
     db.add(group)
 
-    db.commit()
+    await db.commit()
 
-    db.refresh(group)
+    await db.refresh(group)
 
     return {
         "message": "Customization group created",
         "group_id": group.id
     }
 @router.post("/customization-options")
-def create_customization_option(
+async def create_customization_option(
 
     group_id: str,
 
@@ -540,7 +601,7 @@ def create_customization_option(
 
     extra_price: float,
 
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
 
     option = CustomizationOption(
@@ -554,33 +615,41 @@ def create_customization_option(
 
     db.add(option)
 
-    db.commit()
+    await db.commit()
 
-    db.refresh(option)
+    await db.refresh(option)
 
     return {
         "message": "Option added successfully",
         "option_id": option.id
     }
 @router.get("/customization-groups/{restaurant_id}")
-def get_customization_groups(
+async def get_customization_groups(
     restaurant_id: str,
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
 
-    groups = db.query(CustomizationGroup).filter(
-        CustomizationGroup.restaurant_id == restaurant_id
-    ).all()
+    result = await db.execute(
+        select(CustomizationGroup).where(
+            CustomizationGroup.restaurant_id == restaurant_id
+        )
+    )
 
-    result = []
+    groups = result.scalars().all()
+
+    result_list = []
 
     for group in groups:
 
-        options = db.query(CustomizationOption).filter(
-            CustomizationOption.group_id == group.id
-        ).all()
+        options_result = await db.execute(
+            select(CustomizationOption).where(
+                CustomizationOption.group_id == group.id
+            )
+        )
 
-        result.append({
+        options = options_result.scalars().all()
+
+        result_list.append({
 
             "group_id": group.id,
 
@@ -589,10 +658,10 @@ def get_customization_groups(
             "options": options
         })
 
-    return result
+    return result_list
 
 @router.post("/pricing-analytics")
-def create_pricing_analytics(
+async def create_pricing_analytics(
 
     restaurant_id: str,
 
@@ -600,7 +669,7 @@ def create_pricing_analytics(
 
     message: str,
 
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
 
     analytics = PricingAnalytics(
@@ -614,9 +683,9 @@ def create_pricing_analytics(
 
     db.add(analytics)
 
-    db.commit()
+    await db.commit()
 
-    db.refresh(analytics)
+    await db.refresh(analytics)
 
     return {
 
@@ -629,7 +698,7 @@ def create_pricing_analytics(
 
 
 @router.put("/menu/item/{item_id}/pricing")
-def update_menu_pricing(
+async def update_menu_pricing(
 
     item_id: str,
 
@@ -637,30 +706,35 @@ def update_menu_pricing(
 
     tax_category: str,
 
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
 
-    item = db.query(MenuItem).filter(
-        MenuItem.id == item_id
-    ).first()
+    result = await db.execute(
+        select(MenuItem).where(
+            MenuItem.id == item_id
+        )
+    )
+
+    item = result.scalar_one_or_none()
 
     if not item:
-        return {
-            "error": "Menu item not found"
-        }
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Menu item not found"
+        )
 
     item.base_price = base_price
 
     item.tax_category = tax_category
 
-    db.commit()
+    await db.commit()
 
     return {
         "message": "Pricing updated successfully"
     }
 
 @router.post("/pricing-rules")
-def create_pricing_rule(
+async def create_pricing_rule(
 
     menu_item_id: str,
 
@@ -676,7 +750,7 @@ def create_pricing_rule(
 
     active_days: str = None,
 
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
 
     rule = PricingRule(
@@ -698,9 +772,9 @@ def create_pricing_rule(
 
     db.add(rule)
 
-    db.commit()
+    await db.commit()
 
-    db.refresh(rule)
+    await db.refresh(rule)
 
     return {
         "message": "Pricing rule created",
@@ -708,42 +782,49 @@ def create_pricing_rule(
     }
 
 @router.get("/pricing-rules/{menu_item_id}")
-def get_pricing_rules(
+async def get_pricing_rules(
     menu_item_id: str,
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
 
-    rules = db.query(PricingRule).filter(
-        PricingRule.menu_item_id == menu_item_id
-    ).all()
+    result = await db.execute(
+        select(PricingRule).where(
+            PricingRule.menu_item_id == menu_item_id
+        )
+    )
 
-    return rules
+    return result.scalars().all()
 
 @router.delete("/pricing-rules/{rule_id}")
-def delete_pricing_rule(
+async def delete_pricing_rule(
     rule_id: str,
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
 
-    rule = db.query(PricingRule).filter(
-        PricingRule.id == rule_id
-    ).first()
+    result = await db.execute(
+        select(PricingRule).where(
+            PricingRule.id == rule_id
+        )
+    )
+
+    rule = result.scalar_one_or_none()
 
     if not rule:
-        return {
-            "error": "Pricing rule not found"
-        }
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Pricing rule not found"
+        )
 
-    db.delete(rule)
+    await db.delete(rule)
 
-    db.commit()
+    await db.commit()
 
     return {
         "message": "Pricing rule deleted"
     }
 
 @router.post("/menu-schedule")
-def create_menu_schedule(
+async def create_menu_schedule(
 
     menu_item_id: str,
 
@@ -755,7 +836,7 @@ def create_menu_schedule(
 
     service_name: str,
 
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
 
     schedule = MenuSchedule(
@@ -773,9 +854,9 @@ def create_menu_schedule(
 
     db.add(schedule)
 
-    db.commit()
+    await db.commit()
 
-    db.refresh(schedule)
+    await db.refresh(schedule)
 
     return {
         "message": "Schedule created",
@@ -783,25 +864,27 @@ def create_menu_schedule(
     }
 
 @router.get("/menu-schedule/{menu_item_id}")
-def get_menu_schedule(
+async def get_menu_schedule(
     menu_item_id: str,
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
 
-    schedules = db.query(MenuSchedule).filter(
-        MenuSchedule.menu_item_id == menu_item_id
-    ).all()
+    result = await db.execute(
+        select(MenuSchedule).where(
+            MenuSchedule.menu_item_id == menu_item_id
+        )
+    )
 
-    return schedules
+    return result.scalars().all()
 
 @router.post("/gallery/upload")
-def upload_gallery_images(
+async def upload_gallery_images(
 
     restaurant_id: str = Form(...),
 
     images: list[UploadFile] = File(...),
 
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
 
     UPLOAD_DIR = "uploads/gallery"
@@ -830,7 +913,7 @@ def upload_gallery_images(
 
         uploaded_images.append(image.filename)
 
-    db.commit()
+    await db.commit()
 
     return {
         "message": "Images uploaded successfully",
@@ -838,24 +921,28 @@ def upload_gallery_images(
     }
     
 @router.get("/gallery/{restaurant_id}")
-def get_gallery_images(
+async def get_gallery_images(
     restaurant_id: str,
     page: int = 1,
     limit: int = 10,
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
 
     offset = (page - 1) * limit
 
-    images = db.query(FoodGallery).filter(
-        FoodGallery.restaurant_id == restaurant_id
-    ).offset(offset).limit(limit).all()
+    result = await db.execute(
+        select(FoodGallery).where(
+            FoodGallery.restaurant_id == restaurant_id
+        ).offset(offset).limit(limit)
+    )
 
-    result = []
+    images = result.scalars().all()
+
+    result_list = []
 
     for image in images:
 
-        result.append({
+        result_list.append({
 
             "id": str(image.id),
 
@@ -866,80 +953,95 @@ def get_gallery_images(
             "menu_item_id": image.menu_item_id
         })
 
-    return result
+    return result_list
 
 @router.put("/gallery/assign")
-def assign_image_to_menu(
+async def assign_image_to_menu(
 
     gallery_id: str,
 
     menu_item_id: str,
 
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
 
-    image = db.query(FoodGallery).filter(
-        FoodGallery.id == gallery_id
-    ).first()
+    result = await db.execute(
+        select(FoodGallery).where(
+            FoodGallery.id == gallery_id
+        )
+    )
+
+    image = result.scalar_one_or_none()
 
     if not image:
-        return {
-            "error": "Image not found"
-        }
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Image not found"
+        )
 
     image.menu_item_id = menu_item_id
 
     image.status = "assigned"
 
-    db.commit()
+    await db.commit()
 
     return {
         "message": "Image assigned successfully"
     }
     
 @router.put("/gallery/unassign/{gallery_id}")
-def unassign_gallery_image(
+async def unassign_gallery_image(
     gallery_id: str,
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
 
-    image = db.query(FoodGallery).filter(
-        FoodGallery.id == gallery_id
-    ).first()
+    result = await db.execute(
+        select(FoodGallery).where(
+            FoodGallery.id == gallery_id
+        )
+    )
+
+    image = result.scalar_one_or_none()
 
     if not image:
-        return {
-            "error": "Image not found"
-        }
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Image not found"
+        )
 
     image.menu_item_id = None
 
     image.status = "unassigned"
 
-    db.commit()
+    await db.commit()
 
     return {
         "message": "Image unassigned"
     }
 
 @router.delete("/gallery/{gallery_id}")
-def delete_gallery_image(
+async def delete_gallery_image(
     gallery_id: str,
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
 
-    image = db.query(FoodGallery).filter(
-        FoodGallery.id == gallery_id
-    ).first()
+    result = await db.execute(
+        select(FoodGallery).where(
+            FoodGallery.id == gallery_id
+        )
+    )
+
+    image = result.scalar_one_or_none()
 
     if not image:
-        return {
-            "error": "Image not found"
-        }
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Image not found"
+        )
 
-    db.delete(image)
+    await db.delete(image)
 
-    db.commit()
+    await db.commit()
 
     return {
         "message": "Image deleted successfully"
