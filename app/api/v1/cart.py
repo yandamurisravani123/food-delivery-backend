@@ -25,10 +25,14 @@ async def add_to_cart(
     db: AsyncSession = Depends(get_db),
     current_user=Depends(get_current_user)
 ):
-    # check food exists
+    
+    # Check food exists
     food = await db.execute(
-        select(Food).where(Food.id == food_id)
+        select(Food).where(
+            Food.id == food_id
+        )
     )
+
     food_item = food.scalar_one_or_none()
 
     if not food_item:
@@ -45,17 +49,21 @@ async def add_to_cart(
     )
 
     db.add(cart_item)
+
     await db.commit()
+
     await db.refresh(cart_item)
 
     return {
-        "message": "Item added to cart",
-        "cart_id": str(cart_item.id),
-        "food_id": str(food_id),
-        "quantity": quantity,
-        "customization": customization
+        "success": True,
+        "message": "Item added to cart successfully",
+        "data": {
+            "cart_id": str(cart_item.id),
+            "food_id": str(food_id),
+            "quantity": quantity,
+            "customization": customization
+        }
     }
-
 
 # 2. GET ALL CART ITEMS
 @router.get("/")
