@@ -16,8 +16,26 @@ class MenuService:
             restaurant_id
         )
 
+        grouped_menu = {}
+
+        for item in menu:
+
+            category = item.category or "Others"
+
+            if category not in grouped_menu:
+                grouped_menu[category] = []
+
+            grouped_menu[category].append({
+                "id": str(item.id),
+                "item_name": item.item_name,
+                "price": item.base_price,
+                "available": item.is_available,
+                "image": item.image_url
+            })
+
         return {
-            "success": True,
-            "message": "Menu fetched successfully",
-            "data": menu
-        }
+    "success": True,
+    "message": "Restaurant menu fetched successfully",
+    "count": len(menu),
+    "data": grouped_menu
+}

@@ -28,6 +28,36 @@ from app.utils.email_utils import (
 class RestaurantService:
 
 
+    @staticmethod
+    def _serialize_restaurant(restaurant: "restaurant.Restaurant") -> dict:
+        return {
+            "id": str(restaurant.id),
+            "restaurant_name": restaurant.restaurant_name,
+            "owner_name": restaurant.owner_name,
+            "owner_email": restaurant.owner_email,
+            "restaurant_phone": restaurant.restaurant_phone,
+            "address_line1": restaurant.address_line1,
+            "address_line2": restaurant.address_line2,
+            "city": restaurant.city,
+            "state": restaurant.state,
+            "pincode": restaurant.pincode,
+            "latitude": restaurant.latitude,
+            "longitude": restaurant.longitude,
+            "opening_time": restaurant.opening_time,
+            "closing_time": restaurant.closing_time,
+            "gst_number": restaurant.gst_number,
+            "fssai_number": restaurant.fssai_number,
+            "status": restaurant.status,
+            "is_active": restaurant.is_active,
+            "is_trending": restaurant.is_trending,
+            "is_top_rated": restaurant.is_top_rated,
+            "cuisine_types": restaurant.cuisine_types,
+            "created_at": getattr(restaurant, "created_at", None).isoformat() if getattr(restaurant, "created_at", None) else None,
+            "updated_at": getattr(restaurant, "updated_at", None).isoformat() if getattr(restaurant, "updated_at", None) else None,
+        }
+
+
+
     # Register Restaurant
 
 
@@ -79,8 +109,11 @@ class RestaurantService:
         session,
         data
        )
-
-        return restaurant
+        return {
+            "success": True,
+            "message": "Restaurant created successfully",
+            "data": RestaurantService._serialize_restaurant(restaurant)
+        }
 
     # Approve Restaurant
   
@@ -131,7 +164,7 @@ class RestaurantService:
         return {
             "success": True,
             "message": "Restaurant approved successfully",
-            "data": approved_restaurant
+            "data": RestaurantService._serialize_restaurant(approved_restaurant)
         }
 
    
@@ -184,7 +217,7 @@ class RestaurantService:
         return {
             "success": True,
             "message": "Restaurant rejected successfully",
-            "data": rejected_restaurant
+            "data": RestaurantService._serialize_restaurant(rejected_restaurant)
         }
 
     # Get Pending Restaurants
@@ -202,7 +235,7 @@ class RestaurantService:
         return {
             "success": True,
             "message": "Pending restaurants fetched successfully",
-            "data": restaurants
+            "data": [RestaurantService._serialize_restaurant(r) for r in restaurants]
         }
 
     
@@ -221,7 +254,7 @@ class RestaurantService:
         return {
             "success": True,
             "message": "Restaurants fetched successfully",
-            "data": restaurants
+            "data": [RestaurantService._serialize_restaurant(r) for r in restaurants]
         }
 
    
@@ -249,7 +282,7 @@ class RestaurantService:
         return {
             "success": True,
             "message": "Restaurant fetched successfully",
-            "data": restaurant
+            "data": RestaurantService._serialize_restaurant(restaurant)
         }
 
 
@@ -268,7 +301,7 @@ class RestaurantService:
         return {
             "success": True,
             "message": "Nearby restaurants fetched successfully",
-            "data": restaurants
+            "data": [RestaurantService._serialize_restaurant(r) for r in restaurants]
         }
 
    
@@ -288,12 +321,29 @@ class RestaurantService:
             restaurant_id
         )
 
+        grouped_menu = {}
+
+        for item in menu:
+
+            category = item.category or "Others"
+
+            if category not in grouped_menu:
+                grouped_menu[category] = []
+
+            grouped_menu[category].append({
+                "id": str(item.id),
+                "item_name": item.item_name,
+                "price": item.base_price,
+                "available": item.is_available,
+                "image": item.image_url
+            })
+
         return {
             "success": True,
             "message": "Restaurant menu fetched successfully",
-            "data": menu
+            "count": len(menu),
+            "data": grouped_menu
         }
-
 
     # Restaurant Reviews
 
@@ -308,9 +358,19 @@ class RestaurantService:
             session,
             restaurant_id
         )
-
         return {
             "success": True,
             "message": "Restaurant reviews fetched successfully",
-            "data": reviews
+            "data": [
+                {
+                    "id": str(r.id),
+                    "restaurant_id": str(r.restaurant_id),
+                    "order_id": str(r.order_id),
+                    "user_name": r.user_name,
+                    "comment": r.comment,
+                    "rating": r.rating,
+                    "created_at": r.created_at.isoformat() if r.created_at else None
+                }
+                for r in reviews
+            ]
         }

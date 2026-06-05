@@ -17,34 +17,55 @@ class CustomerDiscoveryService:
         restaurants_result = await db.execute(
             select(Restaurant).where(
                 or_(
-                    Restaurant.restaurant_name.ilike(
-                        f"%{query}%"
-                    )
+                    Restaurant.restaurant_name.ilike(f"%{query}%"),
+                    Restaurant.city.ilike(f"%{query}%"),
+                    Restaurant.cuisine_types.ilike(f"%{query}%")
                 )
             )
         )
 
-        restaurants = (
-            restaurants_result.scalars().all()
-        )
+        restaurants = restaurants_result.scalars().all()
 
         menu_result = await db.execute(
             select(MenuItem).where(
                 or_(
-                    MenuItem.item_name.ilike(
-                        f"%{query}%"
-                    )
+                    MenuItem.item_name.ilike(f"%{query}%"),
+                    MenuItem.description.ilike(f"%{query}%"),
+                    MenuItem.category.ilike(f"%{query}%"),
+                    MenuItem.tags.ilike(f"%{query}%")
                 )
             )
         )
 
-        menu_items = (
-            menu_result.scalars().all()
-        )
+        menu_items = menu_result.scalars().all()
 
         return {
-            "restaurants": restaurants,
-            "menu_items": menu_items
+            "success": True,
+            "count": len(restaurants) + len(menu_items),
+            "restaurants": [
+                {
+                    "id": str(restaurant.id),
+                    "restaurant_name": restaurant.restaurant_name,
+                    "city": restaurant.city,
+                    "cuisine_types": restaurant.cuisine_types,
+                    "is_active": restaurant.is_active,
+                    "is_trending": restaurant.is_trending,
+                    "is_top_rated": restaurant.is_top_rated
+                }
+                for restaurant in restaurants
+            ],
+            "menu_items": [
+                {
+                    "id": str(menu_item.id),
+                    "item_name": menu_item.item_name,
+                    "restaurant_id": str(menu_item.restaurant_id),
+                    "category": menu_item.category,
+                    "tags": menu_item.tags,
+                    "is_available": menu_item.is_available,
+                    "image_url": menu_item.image_url
+                }
+                for menu_item in menu_items
+            ]
         }
 
     # CUISINE FILTER
@@ -76,14 +97,32 @@ class CustomerDiscoveryService:
 
         return result.scalars().all()
 
-    # TOP RATED RESTAURANTS
     @staticmethod
     async def top_rated(
         db: AsyncSession
     ):
 
         result = await db.execute(
-            select(Restaurant)
+            select(Restaurant).where(
+                Restaurant.is_top_rated == True
+            )
         )
 
-        return result.scalars().all()
+        restaurants = result.scalars().all()
+
+        return {
+            "success": True,
+            "count": len(restaurants),
+            "data": [
+                {
+                    "id": str(restaurant.id),
+                    "restaurant_name": restaurant.restaurant_name,
+                    "city": restaurant.city,
+                    "cuisine_types": restaurant.cuisine_types,
+                    "is_active": restaurant.is_active,
+                    "is_trending": restaurant.is_trending,
+                    "is_top_rated": restaurant.is_top_rated
+                }
+                for restaurant in restaurants
+            ]
+        }
