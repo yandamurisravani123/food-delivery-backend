@@ -56,7 +56,7 @@ class CustomerDiscoveryService:
 
         result = await db.execute(
             select(Restaurant).where(
-                Restaurant.cuisine_type.ilike(
+                Restaurant.cuisine_types.ilike(
                     f"%{cuisine}%"
                 )
             )

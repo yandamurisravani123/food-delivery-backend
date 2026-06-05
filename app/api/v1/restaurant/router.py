@@ -4,6 +4,7 @@ from sqlalchemy import select
 from fastapi import UploadFile, File, Form
 import csv
 import io
+import uuid
 
 try:
     import pandas as pd
@@ -112,9 +113,18 @@ async def save_bank_details(
             "error": "Account numbers do not match"
         }
 
+    # Validate and convert restaurant_id to UUID
+    try:
+        restaurant_uuid = uuid.UUID(payload.restaurant_id)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid restaurant ID format: {payload.restaurant_id}"
+        )
+
     result = await db.execute(
         select(Restaurant).where(
-            Restaurant.id == payload.restaurant_id
+            Restaurant.id == restaurant_uuid
         )
     )
 
@@ -151,10 +161,18 @@ async def upload_restaurant_documents(
 
     db: AsyncSession = Depends(get_db)
 ):
+    # Validate and convert restaurant_id to UUID
+    try:
+        restaurant_uuid = uuid.UUID(restaurant_id)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid restaurant ID format: {restaurant_id}"
+        )
 
     result = await db.execute(
         select(Restaurant).where(
-            Restaurant.id == restaurant_id
+            Restaurant.id == restaurant_uuid
         )
     )
 
@@ -231,10 +249,18 @@ async def add_menu_item(
 
     db: AsyncSession = Depends(get_db)
 ):
+    # Validate and convert restaurant_id to UUID
+    try:
+        restaurant_uuid = uuid.UUID(restaurant_id)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid restaurant ID format: {restaurant_id}"
+        )
 
     result = await db.execute(
         select(Restaurant).where(
-            Restaurant.id == restaurant_id
+            Restaurant.id == restaurant_uuid
         )
     )
 
@@ -261,7 +287,7 @@ async def add_menu_item(
 
     item = MenuItem(
 
-        restaurant_id=restaurant_id,
+        restaurant_id=restaurant_uuid,
 
         item_name=item_name,
 
@@ -302,10 +328,18 @@ async def bulk_upload_menu(
 
     db: AsyncSession = Depends(get_db)
 ):
+    # Validate and convert restaurant_id to UUID
+    try:
+        restaurant_uuid = uuid.UUID(restaurant_id)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid restaurant ID format: {restaurant_id}"
+        )
 
     result = await db.execute(
         select(Restaurant).where(
-            Restaurant.id == restaurant_id
+            Restaurant.id == restaurant_uuid
         )
     )
 
@@ -342,7 +376,7 @@ async def bulk_upload_menu(
 
         item = MenuItem(
 
-            restaurant_id=restaurant_id,
+            restaurant_id=restaurant_uuid,
 
             item_name=row["item_name"],
 
@@ -382,10 +416,18 @@ async def get_restaurant_menu(
     restaurant_id: str,
     db: AsyncSession = Depends(get_db)
 ):
+    # Validate and convert restaurant_id to UUID
+    try:
+        restaurant_uuid = uuid.UUID(restaurant_id)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid restaurant ID format: {restaurant_id}"
+        )
 
     result = await db.execute(
         select(MenuItem).where(
-            MenuItem.restaurant_id == restaurant_id
+            MenuItem.restaurant_id == restaurant_uuid
         )
     )
 
@@ -485,6 +527,14 @@ async def create_meal_combo(
 
     db: AsyncSession = Depends(get_db)
 ):
+    # Validate and convert restaurant_id to UUID
+    try:
+        restaurant_uuid = uuid.UUID(restaurant_id)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid restaurant ID format: {restaurant_id}"
+        )
 
     UPLOAD_DIR = "uploads/combos"
 
@@ -501,7 +551,7 @@ async def create_meal_combo(
 
     combo = MealCombo(
 
-        restaurant_id=restaurant_id,
+        restaurant_id=restaurant_uuid,
 
         combo_name=combo_name,
 
@@ -529,10 +579,18 @@ async def get_combos(
     restaurant_id: str,
     db: AsyncSession = Depends(get_db)
 ):
+    # Validate and convert restaurant_id to UUID
+    try:
+        restaurant_uuid = uuid.UUID(restaurant_id)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid restaurant ID format: {restaurant_id}"
+        )
 
     result = await db.execute(
         select(MealCombo).where(
-            MealCombo.restaurant_id == restaurant_id
+            MealCombo.restaurant_id == restaurant_uuid
         )
     )
 
@@ -628,10 +686,18 @@ async def get_customization_groups(
     restaurant_id: str,
     db: AsyncSession = Depends(get_db)
 ):
+    # Validate and convert restaurant_id to UUID
+    try:
+        restaurant_uuid = uuid.UUID(restaurant_id)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid restaurant ID format: {restaurant_id}"
+        )
 
     result = await db.execute(
         select(CustomizationGroup).where(
-            CustomizationGroup.restaurant_id == restaurant_id
+            CustomizationGroup.restaurant_id == restaurant_uuid
         )
     )
 
@@ -886,6 +952,14 @@ async def upload_gallery_images(
 
     db: AsyncSession = Depends(get_db)
 ):
+    # Validate and convert restaurant_id to UUID
+    try:
+        restaurant_uuid = uuid.UUID(restaurant_id)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid restaurant ID format: {restaurant_id}"
+        )
 
     UPLOAD_DIR = "uploads/gallery"
 
@@ -902,7 +976,7 @@ async def upload_gallery_images(
 
         gallery = FoodGallery(
 
-            restaurant_id=restaurant_id,
+            restaurant_id=restaurant_uuid,
 
             image_url=image_path,
 
@@ -927,12 +1001,20 @@ async def get_gallery_images(
     limit: int = 10,
     db: AsyncSession = Depends(get_db)
 ):
+    # Validate and convert restaurant_id to UUID
+    try:
+        restaurant_uuid = uuid.UUID(restaurant_id)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid restaurant ID format: {restaurant_id}"
+        )
 
     offset = (page - 1) * limit
 
     result = await db.execute(
         select(FoodGallery).where(
-            FoodGallery.restaurant_id == restaurant_id
+            FoodGallery.restaurant_id == restaurant_uuid
         ).offset(offset).limit(limit)
     )
 
