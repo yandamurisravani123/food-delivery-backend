@@ -39,11 +39,10 @@ class Restaurant(Base):
         nullable=False,
         index=True
     )
-logo_url = Column(
-    String(255),
-    nullable=True
-)
-
+    logo_url = Column(
+        String(255),
+        nullable=True
+    )
 
     cuisine_types = Column(
         String(255),
