@@ -1,144 +1,173 @@
 from typing import List
- 
-from fastapi import APIRouter
-from fastapi import Depends
-from sqlalchemy.orm import Session
- 
+
+from fastapi import APIRouter, Depends
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, or_
+
 from app.core.database import get_db
 from app.schemas.plans import (
     PlanCreate,
-    PlanUpdate,
     PlanResponse,
 )
-from app.services.plans import PlanService
 from app.models.plans import Plan
 from app.models.features import Feature
-from sqlalchemy import or_
-import pydantic 
+
 router = APIRouter(
     prefix="/plans",
     tags=["Plans"]
 )
- 
- 
+
+
+# ==========================
+# GET ALL PLANS
+# ==========================
 @router.get("/", response_model=List[PlanResponse])
-def get_all_plans(
-    db: Session = Depends(get_db)
+async def get_all_plans(
+    db: AsyncSession = Depends(get_db)
 ):
-    return PlanService.get_all_plans(db)
- 
- 
-@router.get("/{plan_id}", response_model=PlanResponse)
-def get_plan_by_id(
-    plan_id: int,
-    db: Session = Depends(get_db)
-):
-    return PlanService.get_plan_by_id(
-        db,
-        plan_id
-    )
- 
- 
-@router.post("/")
-def create_plan(plan: PlanCreate, db: Session = Depends(get_db)):
-
-    db_plan = Plan(**plan.dict())
-
-    db.add(db_plan)
-    db.commit()
-    db.refresh(db_plan)
-
-    print("PLAN TABLE =", Plan.__tablename__)
-    print("PLAN DATA =", db_plan.__dict__)
-
-    return {
-        "id": db_plan.id,
-        "created_at": str(db_plan.created_at),
-        "updated_at": str(db_plan.updated_at),
-        "name": db_plan.name
-    }
+    result = await db.execute(select(Plan))
+    return result.scalars().all()
 
 
-@router.delete("/{plan_id}")
-def delete_plan(
-    plan_id: int,
-    db: Session = Depends(get_db)
-):
-    return PlanService.delete_plan(
-        db,
-        plan_id
-    )
+# ==========================
+# POPULAR PLAN
+# ==========================
 @router.get("/popular")
-def popular_plan(
-    db: Session = Depends(get_db)
+async def popular_plan(
+    db: AsyncSession = Depends(get_db)
 ):
-    return (
-        db.query(Plan)
-        .filter(Plan.is_popular == True)
-        .first()
+    result = await db.execute(
+        select(Plan).where(Plan.is_popular == True)
     )
- 
- 
+    return result.scalars().first()
+
+
+# ==========================
+# ACTIVE PLANS
+# ==========================
 @router.get("/active")
-def active_plans(
-    db: Session = Depends(get_db)
+async def active_plans(
+    db: AsyncSession = Depends(get_db)
 ):
-    return (
-        db.query(Plan)
-        .filter(Plan.is_active == True)
-        .all()
+    result = await db.execute(
+        select(Plan).where(Plan.is_active == True)
     )
- 
- 
-@router.get("/comparison")
-def plan_comparison(
-    db: Session = Depends(get_db)
+    return result.scalars().all()
+
+
+# ==========================
+# SEARCH PLANS
+# ==========================
+@router.get("/search")
+async def search_plans(
+    keyword: str,
+    db: AsyncSession = Depends(get_db)
 ):
- 
-    plans = db.query(Plan).all()
- 
-    result = []
- 
-    for plan in plans:
- 
-        features = (
-            db.query(Feature)
-            .filter(Feature.plan_id == plan.id)
-            .all()
+    result = await db.execute(
+        select(Plan).where(
+            or_(
+                Plan.name.ilike(f"%{keyword}%"),
+                Plan.description.ilike(f"%{keyword}%")
+            )
         )
- 
+    )
+    return result.scalars().all()
+
+
+# ==========================
+# PLAN COMPARISON
+# ==========================
+@router.get("/comparison")
+async def plan_comparison(
+    db: AsyncSession = Depends(get_db)
+):
+    plans_result = await db.execute(select(Plan))
+    plans = plans_result.scalars().all()
+
+    result = []
+
+    for plan in plans:
+        features_result = await db.execute(
+            select(Feature).where(
+                Feature.plan_id == plan.id
+            )
+        )
+
+        features = features_result.scalars().all()
+
         result.append(
             {
                 "plan": plan.name,
                 "price": plan.price,
                 "features": [
                     {
-                        "name": f.feature_name,
-                        "included": f.included,
+                        "name": feature.feature_name,
+                        "included": feature.included
                     }
-                    for f in features
-                ],
+                    for feature in features
+                ]
             }
         )
- 
+
     return result
- 
- 
-@router.get("/search")
-def search_plans(
-    keyword: str,
-    db: Session = Depends(get_db)
+
+
+# ==========================
+# GET PLAN BY ID
+# ==========================
+@router.get("/{plan_id}", response_model=PlanResponse)
+async def get_plan_by_id(
+    plan_id: int,
+    db: AsyncSession = Depends(get_db)
 ):
- 
-    plans = (
-        db.query(Plan)
-        .filter(
-            or_(
-                Plan.name.ilike(f"%{keyword}%"),
-                Plan.description.ilike(f"%{keyword}%"),
-            )
-        )
-        .all()
+    result = await db.execute(
+        select(Plan).where(Plan.id == plan_id)
     )
- 
-    return plans
+
+    return result.scalars().first()
+
+
+# ==========================
+# CREATE PLAN
+# ==========================
+@router.post("/")
+async def create_plan(
+    plan: PlanCreate,
+    db: AsyncSession = Depends(get_db)
+):
+    db_plan = Plan(**plan.model_dump())
+
+    db.add(db_plan)
+
+    await db.commit()
+    await db.refresh(db_plan)
+
+    return {
+        "id": db_plan.id,
+        "created_at": db_plan.created_at,
+        "updated_at": db_plan.updated_at,
+        "name": db_plan.name
+    }
+
+
+# ==========================
+# DELETE PLAN
+# ==========================
+@router.delete("/{plan_id}")
+async def delete_plan(
+    plan_id: int,
+    db: AsyncSession = Depends(get_db)
+):
+    result = await db.execute(
+        select(Plan).where(Plan.id == plan_id)
+    )
+
+    plan = result.scalars().first()
+
+    if not plan:
+        return {"message": "Plan not found"}
+
+    await db.delete(plan)
+    await db.commit()
+
+    return {"message": "Plan deleted successfully"}

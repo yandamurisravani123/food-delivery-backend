@@ -1,99 +1,95 @@
-from datetime import datetime
-from datetime import timedelta
- 
-from sqlalchemy.orm import Session
- 
+from datetime import datetime, timedelta
+
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.models.plans import Plan
 from app.models.subscriptions import Subscription
- 
- 
+
+
 class SubscriptionService:
- 
+
     @staticmethod
-    def subscribe(
-        db: Session,
+    async def subscribe(
+        db: AsyncSession,
         plan_id: int
     ):
- 
-        plan = (
-            db.query(Plan)
-            .filter(
+        result = await db.execute(
+            select(Plan).where(
                 Plan.id == plan_id
             )
-            .first()
         )
- 
+
+        plan = result.scalars().first()
+
         if not plan:
-            return None
- 
+            return {"message": "Plan not found"}
+
         start_date = datetime.utcnow()
- 
-        end_date = (
-            start_date +
-            timedelta(
-                days=plan.duration_days
-            )
+
+        end_date = start_date + timedelta(
+            days=plan.duration_days
         )
- 
+
         subscription = Subscription(
             selected_plan=plan.name,
             start_date=start_date,
             end_date=end_date,
             status="ACTIVE"
         )
- 
+
         db.add(subscription)
-        db.commit()
-        db.refresh(subscription)
- 
+
+        await db.commit()
+        await db.refresh(subscription)
+
         return subscription
- 
+
     @staticmethod
-    def get_current_subscription(
-        db: Session
+    async def get_current_subscription(
+        db: AsyncSession
     ):
-        return (
-            db.query(Subscription)
+        result = await db.execute(
+            select(Subscription)
             .order_by(
                 Subscription.id.desc()
             )
-            .first()
         )
- 
+
+        return result.scalars().first()
+
     @staticmethod
-    def cancel_subscription(
-        db: Session,
+    async def cancel_subscription(
+        db: AsyncSession,
         subscription_id: int
     ):
- 
-        subscription = (
-            db.query(Subscription)
-            .filter(
-                Subscription.id ==
-                subscription_id
+        result = await db.execute(
+            select(Subscription).where(
+                Subscription.id == subscription_id
             )
-            .first()
         )
- 
+
+        subscription = result.scalars().first()
+
         if not subscription:
-            return None
- 
+            return {"message": "Subscription not found"}
+
         subscription.status = "CANCELLED"
- 
-        db.commit()
-        db.refresh(subscription)
- 
+
+        await db.commit()
+        await db.refresh(subscription)
+
         return subscription
- 
+
     @staticmethod
-    def get_subscription_history(
-        db: Session
+    async def get_subscription_history(
+        db: AsyncSession
     ):
-        return (
-            db.query(Subscription)
+        result = await db.execute(
+            select(Subscription)
             .order_by(
                 Subscription.id.desc()
             )
-            .all()
         )
- 
+
+        return result.scalars().all()

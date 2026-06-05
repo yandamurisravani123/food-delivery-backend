@@ -1,31 +1,42 @@
-from sqlalchemy.orm import Session
-
+from sqlalchemy import select
 from app.models.features import Feature
 
 
 class FeatureService:
 
     @staticmethod
-    def get_features_by_plan(db: Session, plan_id: int):
-        return db.query(Feature).filter(Feature.plan_id == plan_id).all()
+    async def get_features_by_plan(db, plan_id: int):
+        result = await db.execute(
+            select(Feature).where(
+                Feature.plan_id == plan_id
+            )
+        )
+        return result.scalars().all()
 
     @staticmethod
-    def create_feature(db: Session, feature_data):
-        feature = Feature(
-            plan_id=feature_data.plan_id,
-            feature_name=feature_data.feature_name,
-            included=feature_data.included,
-        )
+    async def create_feature(db, feature_data):
+        feature = Feature(**feature_data.model_dump())
+
         db.add(feature)
-        db.commit()
-        db.refresh(feature)
+        await db.commit()
+        await db.refresh(feature)
+
         return feature
 
     @staticmethod
-    def delete_feature(db: Session, feature_id: int):
-        feature = db.query(Feature).filter(Feature.id == feature_id).first()
+    async def delete_feature(db, feature_id: int):
+        result = await db.execute(
+            select(Feature).where(
+                Feature.id == feature_id
+            )
+        )
+
+        feature = result.scalars().first()
+
         if not feature:
-            return None
-        db.delete(feature)
-        db.commit()
-        return {"message": "Feature deleted"}
+            return {"message": "Feature not found"}
+
+        await db.delete(feature)
+        await db.commit()
+
+        return {"message": "Feature deleted successfully"}
