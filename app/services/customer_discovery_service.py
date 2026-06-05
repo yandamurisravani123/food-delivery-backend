@@ -71,7 +71,9 @@ class CustomerDiscoveryService:
     ):
 
         result = await db.execute(
-            select(Restaurant)
+            select(Restaurant).where(
+                Restaurant.is_trending == True
+            )
         )
 
         return result.scalars().all()
@@ -83,7 +85,9 @@ class CustomerDiscoveryService:
     ):
 
         result = await db.execute(
-            select(Restaurant)
+            select(Restaurant).where(
+                Restaurant.is_top_rated == True
+            )
         )
 
         return result.scalars().all()
