@@ -14,7 +14,7 @@ from app.services.plans import PlanService
 from app.models.plans import Plan
 from app.models.features import Feature
 from sqlalchemy import or_
- 
+import pydantic 
 router = APIRouter(
     prefix="/plans",
     tags=["Plans"]
@@ -39,17 +39,26 @@ def get_plan_by_id(
     )
  
  
-@router.post("/", response_model=PlanResponse)
-def create_plan(
-    plan: PlanCreate,
-    db: Session = Depends(get_db)
-):
-    return PlanService.create_plan(
-        db,
-        plan
-    )
- 
- 
+@router.post("/")
+def create_plan(plan: PlanCreate, db: Session = Depends(get_db)):
+
+    db_plan = Plan(**plan.dict())
+
+    db.add(db_plan)
+    db.commit()
+    db.refresh(db_plan)
+
+    print("PLAN TABLE =", Plan.__tablename__)
+    print("PLAN DATA =", db_plan.__dict__)
+
+    return {
+        "id": db_plan.id,
+        "created_at": str(db_plan.created_at),
+        "updated_at": str(db_plan.updated_at),
+        "name": db_plan.name
+    }
+
+
 @router.delete("/{plan_id}")
 def delete_plan(
     plan_id: int,
