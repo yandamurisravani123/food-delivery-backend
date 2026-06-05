@@ -12,10 +12,20 @@ router = APIRouter(
 
 @router.get("/search")
 async def search_restaurants(
+<<<<<<< HEAD
+    query: str = Query(..., min_length=1, description="Search keyword for restaurant name or city"),
+=======
     keyword: str = Query(..., alias="query", min_length=1, description="Search keyword for restaurant name or city"),
+>>>>>>> 9bdccde6702a1a094a887e8eb2d6daaa034bb150
     db: AsyncSession = Depends(get_db)
 ):
+<<<<<<< HEAD
     return await CustomerDiscoveryService.search(
         db=db,
         query=keyword
+=======
+    return await SearchService.search_restaurants(
+        keyword=query,
+        db=db
+>>>>>>> 4182889fcc5f5551fc633147132415f45bd34f84
     )
