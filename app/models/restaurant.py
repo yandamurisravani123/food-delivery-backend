@@ -39,7 +39,6 @@ class Restaurant(Base):
         nullable=False,
         index=True
     )
-
     logo_url = Column(
         String(255),
         nullable=True
