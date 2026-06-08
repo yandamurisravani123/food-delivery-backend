@@ -5,11 +5,14 @@ from fastapi import APIRouter, Depends, File, Form, UploadFile
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
+<<<<<<< HEAD
 
 from fastapi import APIRouter, Depends, File, Form, UploadFile
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
+=======
+>>>>>>> 457d15f18d9f3ed7a3ecb61d552797cd208b570c
 from app.config.database import get_db
 from app.core.dependencies import get_current_user
 from app.schemas.auth import (
@@ -105,8 +108,11 @@ async def register_delivery_agent(
     profile_image: UploadFile = File(...),
     session: AsyncSession = Depends(get_db),
 ):
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> 457d15f18d9f3ed7a3ecb61d552797cd208b570c
     file_extension = profile_image.filename.split(".")[-1] if "." in profile_image.filename else "jpg"
     file_name = f"{uuid.uuid4()}.{file_extension}"
     file_path = os.path.join(UPLOAD_DIR, file_name)
@@ -131,8 +137,11 @@ async def register_delivery_agent(
     }
 
     delivery_agent = await DeliveryAgentService.register(session, payload)
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> 457d15f18d9f3ed7a3ecb61d552797cd208b570c
     return {
         "message": "Delivery agent registered successfully. Waiting for super admin approval.",
         "delivery_agent_id": delivery_agent.id,
