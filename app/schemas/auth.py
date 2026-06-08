@@ -28,6 +28,9 @@ class RegisterSuperAdmin(BaseModel):
     @field_validator("phone")
     @classmethod
     def validate_phone(cls, v):
+        if v is None:
+            return v
+
         if v.strip().lower() == "string":
             raise ValueError("Please enter valid phone number")
         return v
