@@ -89,7 +89,6 @@ async def lifespan(app: FastAPI):
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
-        # Ensure orders table has all required columns (safe ALTER IF NOT EXISTS)
         alter_statements = [
             "ALTER TABLE orders ADD COLUMN IF NOT EXISTS status VARCHAR(50) NOT NULL DEFAULT 'pending'",
             "ALTER TABLE orders ADD COLUMN IF NOT EXISTS created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()",
@@ -118,20 +117,23 @@ async def lifespan(app: FastAPI):
             "ALTER TABLE restaurants ADD COLUMN IF NOT EXISTS is_top_rated BOOLEAN NOT NULL DEFAULT FALSE",
             "ALTER TABLE restaurants ADD COLUMN IF NOT EXISTS approved_at TIMESTAMP WITH TIME ZONE",
         ]
+
         for stmt in alter_statements:
             try:
                 await conn.execute(text(stmt))
             except Exception:
-                pass  # Column may already exist
+                pass
 
     print("✅ Database Connected")
 
     redis_available = await connect_redis()
+
     if redis_available:
         print("✅ Redis Connected")
     else:
-        print("⚠️  Redis not available, continuing without Redis")
+        print("⚠️ Redis not available, continuing without Redis")
 
+    # REQUIRED
     yield
 
     await close_redis()

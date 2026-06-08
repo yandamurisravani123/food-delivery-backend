@@ -25,7 +25,8 @@ async def pending_restaurants(
     session: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_super_admin),
 ):
-    return await RestaurantService.get_pending_restaurants(session)
+    response = await RestaurantService.get_pending_restaurants(session)
+    return response.get("data", [])
  
  
 @router.post("/{restaurant_id}/approve", response_model=RestaurantApprovalResponse)
@@ -68,7 +69,8 @@ async def get_all_restaurants(
     session: AsyncSession = Depends(get_db),
     current_user=Depends(require_super_admin),
 ):
-    return await RestaurantService.get_all(session)
+    response = await RestaurantService.get_all(session)
+    return response.get("data", [])
  
  
 @router.get("/restaurants/{restaurant_id}", response_model=RestaurantOut)
@@ -77,10 +79,11 @@ async def get_restaurant_by_id(
     session: AsyncSession = Depends(get_db),
     current_user=Depends(require_super_admin),
 ):
-    return await RestaurantService.get_by_id(
+    response = await RestaurantService.get_by_id(
         session,
         restaurant_id,
     )
+    return response.get("data")
  
 @router.get("/pending-delivery", response_model=list[DeliveryAgentOut])
 async def pending_delivery_agents(
