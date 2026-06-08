@@ -1,13 +1,23 @@
 from pydantic import BaseModel
-from uuid import UUID
 from typing import Optional
 
 
 class FeedbackCreate(BaseModel):
-    user_id: UUID
+    user_id: str
     order_id: int
     rating: float
     review: Optional[str] = None
+
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "user_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+                "order_id": 123,
+                "rating": 4.5,
+                "review": "Great delivery experience!"
+            }
+        }
+    }
 
 
 class FeedbackSuccessResponse(BaseModel):

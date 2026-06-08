@@ -1,4 +1,7 @@
 import uuid
+from uuid import UUID
+
+from fastapi import HTTPException, status
 
 from app.models.review import Review
 
@@ -38,10 +41,19 @@ class ReviewService:
         request
     ):
 
+        try:
+            restaurant_id = UUID(str(request.restaurant_id))
+            order_id = UUID(str(request.order_id))
+        except ValueError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="order_id and restaurant_id must be valid UUID strings"
+            )
+
         review = Review(
             id=uuid.uuid4(),
-            order_id=request.order_id,
-            restaurant_id=request.restaurant_id,
+            order_id=order_id,
+            restaurant_id=restaurant_id,
             user_name=request.user_name,
             comment=request.comment,
             rating=request.rating

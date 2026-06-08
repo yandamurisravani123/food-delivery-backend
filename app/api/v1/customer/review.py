@@ -8,6 +8,7 @@ from fastapi import (
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from typing import List
+from uuid import UUID
 
 from app.config.database import get_db
 
@@ -24,7 +25,7 @@ router = APIRouter()
 
 @router.get("/orders/{order_id}")
 async def get_order_details(
-    order_id: str,
+    order_id: UUID,
     db: AsyncSession = Depends(get_db)
 ):
     return await ReviewService.get_order_details(
