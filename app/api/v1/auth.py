@@ -1,16 +1,15 @@
 import os
 import uuid
-<<<<<<< HEAD
 
 from fastapi import APIRouter, Depends, File, Form, UploadFile
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
-=======
+
 from fastapi import APIRouter, Depends, File, Form, UploadFile
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
->>>>>>> smart-bidding-feature
+
 from app.config.database import get_db
 from app.core.dependencies import get_current_user
 from app.schemas.auth import (
@@ -106,10 +105,8 @@ async def register_delivery_agent(
     profile_image: UploadFile = File(...),
     session: AsyncSession = Depends(get_db),
 ):
-<<<<<<< HEAD
-=======
-    
->>>>>>> smart-bidding-feature
+
+
     file_extension = profile_image.filename.split(".")[-1] if "." in profile_image.filename else "jpg"
     file_name = f"{uuid.uuid4()}.{file_extension}"
     file_path = os.path.join(UPLOAD_DIR, file_name)
@@ -134,20 +131,15 @@ async def register_delivery_agent(
     }
 
     delivery_agent = await DeliveryAgentService.register(session, payload)
-<<<<<<< HEAD
 
-=======
->>>>>>> smart-bidding-feature
+
     return {
         "message": "Delivery agent registered successfully. Waiting for super admin approval.",
         "delivery_agent_id": delivery_agent.id,
         "status": delivery_agent.status,
     }
 
-<<<<<<< HEAD
 
-=======
->>>>>>> smart-bidding-feature
 @router.post("/forgot-password", response_model=ForgotPasswordResponse)
 async def forgot_password(
     payload: ForgotPasswordRequest,

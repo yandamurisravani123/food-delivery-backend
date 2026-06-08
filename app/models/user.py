@@ -14,11 +14,8 @@ class User(Base):
     )
     full_name = Column(String(120), nullable=False)
     email = Column(String(255), unique=True, index=True, nullable=False)
-<<<<<<< HEAD
     phone = Column(String(20), unique=True, index=True, nullable=True)
-=======
     phone = Column(String(255), unique=True, index=True, nullable=True)
->>>>>>> smart-bidding-feature
     hashed_password = Column(String(255), nullable=False)
     role = Column(String(30), nullable=False, default="super_admin")
     is_active = Column(Boolean, default=True)

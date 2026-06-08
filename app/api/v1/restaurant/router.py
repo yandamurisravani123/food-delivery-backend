@@ -13,10 +13,20 @@ import shutil
 import uuid
 from sqlalchemy.orm import Session, selectinload
 from app.config.database import get_db
+from app.models import restaurant
 from app.models.restaurant import Restaurant
+<<<<<<< Updated upstream
 from app.models.menu import MenuItem       
 from app.schemas import order
 from app.schemas.restaurant_bank import RestaurantBankRequest
+=======
+from app.models.menu import MenuItem
+from app.schemas.restaurant import (
+    RestaurantRegisterRequest,
+    RestaurantOut,
+    RestaurantApprovalResponse
+)
+>>>>>>> Stashed changes
 from app.models.combo import MealCombo
 from app.models.customization import (
     CustomizationGroup,
@@ -27,6 +37,7 @@ from app.models.pricing_rule import PricingRule
 from app.models.pricing_analytics import PricingAnalytics
 from app.models.menu_schedule import MenuSchedule
 
+<<<<<<< Updated upstream
 from app.models.gallery import Gallery
 
 from app.models.order import Order, OrderStatus
@@ -98,6 +109,10 @@ from sqlalchemy import or_
 from fastapi import Query
 from fastapi.responses import StreamingResponse
  
+=======
+from app.models.gallery import FoodGallery
+from sqlalchemy.ext.asyncio import AsyncSession
+>>>>>>> Stashed changes
 
 router = APIRouter(
     prefix="/restaurants",
@@ -228,6 +243,7 @@ async def restaurant_onboarding(
         is_draft=is_draft
     )
 
+<<<<<<< Updated upstream
     db.add(restaurant)
 
 <<<<<<< HEAD
@@ -239,6 +255,18 @@ async def restaurant_onboarding(
 
     await db.refresh(restaurant)
 >>>>>>> smart-bidding-feature
+=======
+
+
+@router.post("/restaurant-onboarding")
+def save_restaurant(
+    payload: RestaurantRegisterRequest,
+    db: Session = Depends(get_db)
+):
+    #db.add(restaurant)
+    db.commit()
+    db.refresh(restaurant)
+>>>>>>> Stashed changes
 
     return {
         "message": "Restaurant onboarding saved",
@@ -257,6 +285,7 @@ async def upload_restaurant_documents(
     db: AsyncSession = Depends(get_db)
 ):
 
+<<<<<<< Updated upstream
     # Async query fix
     result = await db.execute(
         select(Restaurant).where(Restaurant.id == restaurant_id)
@@ -282,8 +311,53 @@ async def upload_restaurant_documents(
 async def save_bank_details(
     payload: RestaurantBankRequest,
     db: AsyncSession = Depends(get_db)
+=======
+# @router.post("/bank-details")
+# def save_bank_details(
+#     payload: RestaurantBankRequest,vvv
+#     db: Session = Depends(get_db)
+# ):
+@router.post("/bank-details")
+def save_bank_details(
+
+    restaurant_id: str = Form(...),h
+
+    bank_account_holder: str = Form(...),
+
+    bank_account_number: str = Form(...),
+
+    confirm_account_number: str = Form(...),
+
+    ifsc_code: str = Form(...),
+
+    db: Session = Depends(get_db)
+
 ):
 
+    if bank_account_number != confirm_account_number:
+        return {
+            "error": "Account numbers do not match"
+        }
+
+    restaurant = db.query(Restaurant).filter(
+        Restaurant.id == restaurant_id
+    ).first()
+
+    if not restaurant:
+        return {
+            "error": "Restaurant not found"
+        }
+
+    restaurant.bank_account_holder = bank_account_holder
+    restaurant.bank_account_number = bank_account_number
+    restaurant.ifsc_code = ifsc_code
+
+    db.commit()
+
+    return {
+        "message": "Bank details saved successfully"
+    }
+    
     if payload.bank_account_number != payload.confirm_account_number:
         return {
             "error": "Account numbers do not match"
@@ -2201,7 +2275,7 @@ async def update_notes(order_id: int, note: str, db: AsyncSession = Depends(get_
 async def update_extras(
     order_id: int,
     extras: str,
-=======
+    db: AsyncSession = Depends(get_db)):
         "message": "Campaign paused successfully"
     }
 
@@ -2377,14 +2451,12 @@ async def print_receipt(order_id: int, db: AsyncSession = Depends(get_db)):
             "total": round(total, 2),
             "status": order.status
         }
-<<<<<<< HEAD
-=======
+
         select(Campaign).where(Campaign.id == campaign_id)
     )
 
     campaign = result.scalar_one_or_none()
 
-=======
     }
     
     

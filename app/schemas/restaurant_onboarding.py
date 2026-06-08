@@ -1,7 +1,11 @@
 from typing import Optional
 from pydantic import BaseModel
+<<<<<<< Updated upstream
 
 <<<<<<< HEAD
+=======
+from app.schemas.restaurant import RestaurantRequest, RestaurantBankRequest
+>>>>>>> Stashed changes
 
 =======
 >>>>>>> smart-bidding-feature
