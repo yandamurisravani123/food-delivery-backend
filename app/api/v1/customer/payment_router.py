@@ -1,13 +1,19 @@
-from fastapi import APIRouter
+from sqlalchemy import Column, String, Float
+from sqlalchemy.dialects.postgresql import UUID
+import uuid
 
-from app.schemas.payment import PaymentRequest
-from app.services.payment_service import PaymentService
+from app.config.database import Base
 
-router = APIRouter(
-    prefix="/payments",
-    tags=["Payments"]
-)
 
-@router.post("/pay")
-def make_payment(payment: PaymentRequest):
-    return PaymentService.create_payment(payment)
+class Payment(Base):
+    __tablename__ = "payments"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+
+    order_id = Column(UUID(as_uuid=True), nullable=False)
+
+    amount = Column(Float, nullable=False)
+
+    payment_method = Column(String, nullable=False)
+
+    status = Column(String, default="Pending")
