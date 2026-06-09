@@ -17,6 +17,7 @@ from sqlalchemy.sql import func
 from sqlalchemy.dialects.postgresql import UUID
 
 from app.config.database import Base
+from sqlalchemy import Column, Integer
 
 
 class Review(Base):
@@ -41,7 +42,7 @@ class Review(Base):
 
     
     order_id = Column(
-        UUID(as_uuid=True),
+        Integer,
         nullable=False
     )
 
