@@ -2,6 +2,7 @@ import uuid
 from sqlalchemy import Column, String, Float, DateTime, ForeignKey, func
 from sqlalchemy.dialects.postgresql import UUID
 from app.config.database import Base
+from sqlalchemy import Column, Integer
 
 
 class Payment(Base):
@@ -10,7 +11,7 @@ class Payment(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
 
-    order_id = Column(String(255), nullable=True)
+    order_id = Column(Integer, nullable=True)
 
     user_id = Column(UUID(as_uuid=True), nullable=True)
 

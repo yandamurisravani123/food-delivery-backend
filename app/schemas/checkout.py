@@ -1,10 +1,12 @@
+from uuid import UUID
+
 from pydantic import BaseModel
 from datetime import date, time
 
 
 class CheckoutCreate(BaseModel):
 
-    user_id: str
+    user_id: UUID
 
     address: str
 

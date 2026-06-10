@@ -1,9 +1,11 @@
+from uuid import UUID
+
 from pydantic import BaseModel
 from typing import Optional
 
 
 class FeedbackCreate(BaseModel):
-    user_id: str
+    user_id: UUID
     order_id: int
     rating: float
     review: Optional[str] = None

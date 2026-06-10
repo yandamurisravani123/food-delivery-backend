@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
-
+from uuid import UUID
 from app.config.database import get_db
 from app.models.order import Order
 
@@ -12,7 +12,7 @@ router = APIRouter(tags=["Savings"])
 
 @router.get("/savings/overview")
 async def savings_overview(
-    user_id: int,
+    user_id: UUID,
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -37,7 +37,7 @@ async def savings_overview(
 
 @router.get("/savings/monthly")
 async def monthly_savings(
-    user_id: int,
+    user_id: UUID,
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -72,7 +72,7 @@ async def monthly_savings(
 
 @router.get("/savings/compare")
 async def savings_compare(
-    user_id: int,
+    user_id: UUID,
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -101,7 +101,7 @@ async def savings_compare(
 
 @router.get("/savings/daily")
 async def daily_savings(
-    user_id: int,
+    user_id: UUID,
     db: AsyncSession = Depends(get_db)
 ):
     """

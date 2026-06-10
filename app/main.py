@@ -19,7 +19,7 @@ for model_file in sorted(models_dir.glob("*.py")):
 
 
 # ROUTERS — Auth
-from app.api.v1.auth import router as auth_router
+from app.api.v1.customer.auth import router as auth_router
 
 # ROUTERS — Admin
 from app.api.v1.admin.super_admin import router as super_admin_router
@@ -67,7 +67,12 @@ from app.api.v1.customer.notification_router import router as notification_route
 from app.api.v1.driver.router import router as driver_router
 
 # ROUTERS — Sravani Features (LEV-165)
+<<<<<<< HEAD
 from app.api.v1.cart_router import router as cart_router
+=======
+# =====================================================
+from app.api.v1.customer.cart_router import router as cart_router
+>>>>>>> 81a7d48d016c94dcee7c2e99ad3bb275aa433dca
 from app.api.v1.order_tracking import router as order_tracking_router
 from app.api.v1.delivery_notification_router import router as delivery_notification_router
 from app.api.v1.payment_method import router as payment_method_router
