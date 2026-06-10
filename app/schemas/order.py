@@ -5,14 +5,15 @@ from uuid import UUID
 
 
 class OrderItemCreate(BaseModel):
-    name: str
+    food_id: Optional[int] = None
+    name: Optional[str] = None
     quantity: int
-    price: float
+    price: Optional[float] = 0.0
 
 
 class OrderItemResponse(BaseModel):
-    order_id: int
-    name: str
+    order_id: UUID
+    name: Optional[str] = None
     quantity: int
     price: float
 
@@ -30,7 +31,7 @@ class OrderCreate(BaseModel):
 
 
 class OrderResponse(BaseModel):
-    order_id: int
+    id: UUID
     user_id: UUID
     restaurant_id: UUID
     items: List[OrderItemResponse]
@@ -48,7 +49,7 @@ class OrderResponse(BaseModel):
     completed_at: Optional[datetime] = None
 
     prep_time: int
-    is_urgent: str
+    is_urgent: bool
 
     delivery_address: Optional[str] = None
     courier_name: Optional[str] = None

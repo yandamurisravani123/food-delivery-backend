@@ -1,62 +1,55 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 from app.models.plans import Plan
- 
- 
+
+
 class PlanService:
- 
+
     @staticmethod
-    def get_all_plans(db: Session):
-        return db.query(Plan).all()
- 
+    async def get_all_plans(db: AsyncSession):
+        result = await db.execute(select(Plan))
+        return result.scalars().all()
+
     @staticmethod
-    def get_plan_by_id(
-        db: Session,
-        plan_id: int
-    ):
-        return (
-            db.query(Plan)
-            .filter(Plan.id == plan_id)
-            .first()
+    async def get_plan_by_id(db: AsyncSession, plan_id: int):
+        result = await db.execute(
+            select(Plan).where(Plan.id == plan_id)
         )
- 
+        return result.scalar_one_or_none()
+
     @staticmethod
-    def create_plan(
-        db: Session,
-        plan_data
-    ):
+    async def create_plan(db: AsyncSession, plan_data):
         plan = Plan(
             name=plan_data.name,
             price=plan_data.price,
             description=plan_data.description,
             duration_days=plan_data.duration_days,
             free_trial_days=plan_data.free_trial_days,
-            is_popular=plan_data.is_popular
+            is_popular=plan_data.is_popular,
+            is_featured=plan_data.is_featured,
+            is_active=plan_data.is_active,
+            badge_text=plan_data.badge_text,
+            button_text=plan_data.button_text,
+            theme_color=plan_data.theme_color,
+            icon_url=plan_data.icon_url,
+            display_order=plan_data.display_order,
         )
- 
         db.add(plan)
-        db.commit()
-        db.refresh(plan)
- 
+        await db.commit()
+        await db.refresh(plan)
         return plan
- 
+
     @staticmethod
-    def delete_plan(
-        db: Session,
-        plan_id: int
-    ):
-        plan = (
-            db.query(Plan)
-            .filter(Plan.id == plan_id)
-            .first()
+    async def delete_plan(db: AsyncSession, plan_id: int):
+        result = await db.execute(
+            select(Plan).where(Plan.id == plan_id)
         )
- 
+        plan = result.scalar_one_or_none()
+
         if not plan:
             return None
- 
-        db.delete(plan)
-        db.commit()
- 
-        return {
-            "message": "Plan Deleted"
-        }
- 
+
+        await db.delete(plan)
+        await db.commit()
+
+        return {"message": "Plan Deleted"}

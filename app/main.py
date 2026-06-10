@@ -66,9 +66,7 @@ from app.api.v1.customer.tracking_router import router as tracking_detail_router
 from app.api.v1.customer.notification_router import router as notification_router
 from app.api.v1.driver.router import router as driver_router
 
-# =====================================================
 # ROUTERS — Sravani Features (LEV-165)
-# =====================================================
 from app.api.v1.cart_router import router as cart_router
 from app.api.v1.order_tracking import router as order_tracking_router
 from app.api.v1.delivery_notification_router import router as delivery_notification_router
@@ -87,6 +85,7 @@ from app.api.v1.customer.customer_rating import router as customer_rating_router
 async def lifespan(app: FastAPI):
 
     async with engine.begin() as conn:
+        await conn.execute(text("DROP TABLE IF EXISTS user_preferences CASCADE"))
         await conn.run_sync(Base.metadata.create_all)
 
         # Ensure orders table has all required columns (safe ALTER IF NOT EXISTS)
@@ -116,26 +115,29 @@ async def lifespan(app: FastAPI):
             "ALTER TABLE orders ADD COLUMN IF NOT EXISTS total DOUBLE PRECISION NOT NULL DEFAULT 0.0",
             "ALTER TABLE restaurants ADD COLUMN IF NOT EXISTS is_trending BOOLEAN NOT NULL DEFAULT FALSE",
             "ALTER TABLE restaurants ADD COLUMN IF NOT EXISTS is_top_rated BOOLEAN NOT NULL DEFAULT FALSE",
-            "ALTER TABLE restaurants ADD COLUMN IF NOT EXISTS approved_at TIMESTAMP WITH TIME ZONE",
-        ]
+            "ALTER TABLE restaurants ADD COLUMN IF NOT EXISTS approved_at TIMESTAMP WITH TIME ZONE", 
+            "ALTER TABLE user_preferences ALTER COLUMN user_id TYPE UUID USING user_id::text::uuid",
+            "ALTER TABLE user_preferences ALTER COLUMN id TYPE UUID USING id::text::uuid",
+]
+        
         for stmt in alter_statements:
             try:
                 await conn.execute(text(stmt))
             except Exception:
                 pass  # Column may already exist
 
-    print("✅ Database Connected")
+    print("Database Connected")
 
     redis_available = await connect_redis()
     if redis_available:
-        print("✅ Redis Connected")
+        print("Redis Connected")
     else:
-        print("⚠️  Redis not available, continuing without Redis")
+        print(" Redis not available, continuing without Redis")
 
     yield
 
     await close_redis()
-    print("✅ Redis Disconnected")
+    print("Redis Disconnected")
 
 
 # FASTAPI APP
@@ -198,7 +200,7 @@ app.include_router(notification_router)
 app.include_router(driver_router)
 
 # ---- Sravani Routers ----
-app.include_router(cart_router, prefix="/api/v1")
+app.include_router(cart_router)
 app.include_router(order_tracking_router, prefix="/api/v1")
 app.include_router(delivery_notification_router, prefix="/api/v1")
 app.include_router(payment_method_router, prefix="/api/v1")
@@ -210,9 +212,7 @@ app.include_router(customer_discovery_router)
 app.include_router(customer_rating_router)
 
 
-# =====================================================
 # ROOT
-# =====================================================
 
 @app.get("/")
 async def root():

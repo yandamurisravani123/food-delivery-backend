@@ -1,135 +1,107 @@
 from typing import List
- 
-from fastapi import APIRouter
-from fastapi import Depends
-from sqlalchemy.orm import Session
- 
+
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, or_
+
 from app.config.database import get_db
-from app.schemas.plans import (
-    PlanCreate,
-    PlanUpdate,
-    PlanResponse,
-)
+from app.schemas.plans import PlanCreate, PlanUpdate, PlanResponse
 from app.services.plans import PlanService
 from app.models.plans import Plan
 from app.models.features import Feature
-from sqlalchemy import or_
- 
+
 router = APIRouter(
     prefix="/plans",
     tags=["Plans"]
 )
- 
- 
-@router.get("/", response_model=List[PlanResponse])
-def get_all_plans(
-    db: Session = Depends(get_db)
-):
-    return PlanService.get_all_plans(db)
- 
- 
-@router.get("/{plan_id}", response_model=PlanResponse)
-def get_plan_by_id(
-    plan_id: int,
-    db: Session = Depends(get_db)
-):
-    return PlanService.get_plan_by_id(
-        db,
-        plan_id
-    )
- 
- 
-@router.post("/", response_model=PlanResponse)
-def create_plan(
-    plan: PlanCreate,
-    db: Session = Depends(get_db)
-):
-    return PlanService.create_plan(
-        db,
-        plan
-    )
- 
- 
-@router.delete("/{plan_id}")
-def delete_plan(
-    plan_id: int,
-    db: Session = Depends(get_db)
-):
-    return PlanService.delete_plan(
-        db,
-        plan_id
-    )
+
+
+# ✅ Specific routes BEFORE /{plan_id}
 @router.get("/popular")
-def popular_plan(
-    db: Session = Depends(get_db)
-):
-    return (
-        db.query(Plan)
-        .filter(Plan.is_popular == True)
-        .first()
+async def popular_plan(db: AsyncSession = Depends(get_db)):
+    result = await db.execute(
+        select(Plan).where(Plan.is_popular == True)
     )
- 
- 
+    return result.scalars().first()
+
+
 @router.get("/active")
-def active_plans(
-    db: Session = Depends(get_db)
-):
-    return (
-        db.query(Plan)
-        .filter(Plan.is_active == True)
-        .all()
+async def active_plans(db: AsyncSession = Depends(get_db)):
+    result = await db.execute(
+        select(Plan).where(Plan.is_active == True)
     )
- 
- 
+    return result.scalars().all()
+
+
 @router.get("/comparison")
-def plan_comparison(
-    db: Session = Depends(get_db)
-):
- 
-    plans = db.query(Plan).all()
- 
-    result = []
- 
+async def plan_comparison(db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(Plan))
+    plans = result.scalars().all()
+
+    comparison = []
     for plan in plans:
- 
-        features = (
-            db.query(Feature)
-            .filter(Feature.plan_id == plan.id)
-            .all()
+        feat_result = await db.execute(
+            select(Feature).where(Feature.plan_id == plan.id)
         )
- 
-        result.append(
-            {
-                "plan": plan.name,
-                "price": plan.price,
-                "features": [
-                    {
-                        "name": f.feature_name,
-                        "included": f.included,
-                    }
-                    for f in features
-                ],
-            }
-        )
- 
-    return result
- 
- 
+        features = feat_result.scalars().all()
+        comparison.append({
+            "plan": plan.name,
+            "price": plan.price,
+            "features": [
+                {"name": f.feature_name, "included": f.included}
+                for f in features
+            ],
+        })
+    return comparison
+
+
 @router.get("/search")
-def search_plans(
+async def search_plans(
     keyword: str,
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
- 
-    plans = (
-        db.query(Plan)
-        .filter(
+    result = await db.execute(
+        select(Plan).where(
             or_(
                 Plan.name.ilike(f"%{keyword}%"),
                 Plan.description.ilike(f"%{keyword}%"),
             )
         )
-        .all()
     )
- 
-    return plans
+    return result.scalars().all()
+
+
+# ✅ General routes AFTER specific routes
+@router.get("/", response_model=List[PlanResponse])
+async def get_all_plans(db: AsyncSession = Depends(get_db)):
+    return await PlanService.get_all_plans(db)
+
+
+@router.get("/{plan_id}", response_model=PlanResponse)
+async def get_plan_by_id(
+    plan_id: int,
+    db: AsyncSession = Depends(get_db)
+):
+    plan = await PlanService.get_plan_by_id(db, plan_id)
+    if not plan:
+        raise HTTPException(status_code=404, detail="Plan not found")
+    return plan
+
+
+@router.post("/", response_model=PlanResponse)
+async def create_plan(
+    plan: PlanCreate,
+    db: AsyncSession = Depends(get_db)
+):
+    return await PlanService.create_plan(db, plan)
+
+
+@router.delete("/{plan_id}")
+async def delete_plan(
+    plan_id: int,
+    db: AsyncSession = Depends(get_db)
+):
+    result = await PlanService.delete_plan(db, plan_id)
+    if not result:
+        raise HTTPException(status_code=404, detail="Plan not found")
+    return result

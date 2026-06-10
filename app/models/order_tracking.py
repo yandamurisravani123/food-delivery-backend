@@ -1,6 +1,7 @@
 import uuid
 
 from sqlalchemy import (
+    Integer,
     String,
     DateTime,
     func,
@@ -23,10 +24,8 @@ class OrderTracking(Base):
         default=uuid.uuid4
     )
 
-    order_id = mapped_column(
-        UUID(as_uuid=True),
-        nullable=False
-    )
+    order_id = mapped_column(Integer, nullable=False)
+
 
     delivery_partner_id = mapped_column(
         UUID(as_uuid=True),

@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from uuid import UUID
 
 from app.config.database import get_db
 from app.models.cart import Cart
@@ -16,33 +17,25 @@ router = APIRouter(
 async def add_to_cart(
     food_id: int,
     quantity: int,
-    user_id: str,
+    user_id: UUID,
     db: AsyncSession = Depends(get_db)
 ):
-
     result = await db.execute(
-        select(Food).where(
-            Food.id == food_id
-        )
+        select(Food).where(Food.id == food_id)
     )
-
     food = result.scalar_one_or_none()
 
     if not food:
-        raise HTTPException(
-            status_code=404,
-            detail="Food not found"
-        )
+        raise HTTPException(status_code=404, detail="Food not found")
 
     cart_item = Cart(
-        user_id=user_id,
+        customer_id=user_id,
         food_id=food_id,
-        quantity=quantity
+        quantity=quantity,
+        total_price=food.price * quantity
     )
 
     db.add(cart_item)
-
-    # IMPORTANT
     await db.commit()
     await db.refresh(cart_item)
 
