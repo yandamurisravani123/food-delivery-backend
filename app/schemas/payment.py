@@ -4,7 +4,7 @@ from uuid import UUID
 
 
 class PaymentRequest(BaseModel):
-    order_id: UUID
+    order_id: int
     amount: float
     payment_method: Literal["COD"] = "COD"
     status: Optional[str] = "Pending"

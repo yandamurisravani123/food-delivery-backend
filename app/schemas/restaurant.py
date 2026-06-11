@@ -66,3 +66,9 @@ class RestaurantRegisterResponse(BaseModel):
     message: str
     restaurant_id: UUID
     status: str
+
+
+class PendingRestaurantsResponse(BaseModel):
+    success: bool
+    message: str
+    data: list[RestaurantOut]

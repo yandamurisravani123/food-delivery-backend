@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -27,9 +29,17 @@ async def create_feedback(
     db: AsyncSession = Depends(get_db)
 ):
 
+    try:
+        user_id = UUID(payload.user_id)
+    except (ValueError, TypeError):
+        raise HTTPException(
+            status_code=400,
+            detail="user_id must be a valid UUID string"
+        )
+
     user_result = await db.execute(
         select(User).where(
-            User.id == payload.user_id
+            User.id == user_id
         )
     )
 
@@ -42,7 +52,7 @@ async def create_feedback(
         )
 
     feedback = Feedback(
-        user_id=payload.user_id,
+        user_id=user_id,
         order_id=payload.order_id,
         rating=payload.rating,
         review=payload.review,

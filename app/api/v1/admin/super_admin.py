@@ -11,6 +11,7 @@ from app.schemas.restaurant import (
     RestaurantApprovalResponse,
     RestaurantOut,
     RestaurantRegisterRequest,
+    PendingRestaurantsResponse,
 )
 from app.services.delivery_service import DeliveryAgentService
 from app.services.restaurant_service import RestaurantService
@@ -20,13 +21,12 @@ router = APIRouter(prefix="/Super_admin", tags=["Super Admin"])
  
  
  
-@router.get("/pending", response_model=list[RestaurantOut])
+@router.get("/pending", response_model=PendingRestaurantsResponse)
 async def pending_restaurants(
     session: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_super_admin),
 ):
-    response = await RestaurantService.get_pending_restaurants(session)
-    return response.get("data", [])
+    return await RestaurantService.get_pending_restaurants(session)
  
  
 @router.post("/{restaurant_id}/approve", response_model=RestaurantApprovalResponse)
@@ -69,8 +69,7 @@ async def get_all_restaurants(
     session: AsyncSession = Depends(get_db),
     current_user=Depends(require_super_admin),
 ):
-    response = await RestaurantService.get_all(session)
-    return response.get("data", [])
+    return await RestaurantService.get_all(session)
  
  
 @router.get("/restaurants/{restaurant_id}", response_model=RestaurantOut)
@@ -79,11 +78,10 @@ async def get_restaurant_by_id(
     session: AsyncSession = Depends(get_db),
     current_user=Depends(require_super_admin),
 ):
-    response = await RestaurantService.get_by_id(
+    return await RestaurantService.get_by_id(
         session,
         restaurant_id,
     )
-    return response.get("data")
  
 @router.get("/pending-delivery", response_model=list[DeliveryAgentOut])
 async def pending_delivery_agents(
@@ -148,4 +146,3 @@ async def get_delivery_agent_by_id(
         session,
         delivery_agent_id,
     )
- 

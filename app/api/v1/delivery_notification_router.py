@@ -6,7 +6,7 @@ from fastapi import (
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-
+from uuid import UUID
 from app.config.database import get_db
 from app.models.delivery_notification import (
     DeliveryNotification
@@ -25,7 +25,7 @@ router = APIRouter(
 # --------------------------------
 @router.post("/create")
 async def create_notification(
-    user_id: int,
+    user_id: UUID,
     order_id: int,
     title: str,
     message: str,
@@ -71,7 +71,7 @@ async def create_notification(
 # --------------------------------
 @router.get("/{user_id}")
 async def get_notifications(
-    user_id: int,
+    user_id: UUID,
     db: AsyncSession = Depends(get_db)
 ):
 

@@ -75,11 +75,12 @@ async def register_restaurant(
     payload: RestaurantRegisterRequest,
     session: AsyncSession = Depends(get_db),
 ):
-    restaurant = await RestaurantService.register_restaurant(session, payload)
+    restaurant_response = await RestaurantService.register_restaurant(session, payload)
+    restaurant_data = restaurant_response["data"]
     return {
-        "message": "Restaurant registered successfully. Waiting for super admin approval.",
-        "restaurant_id": restaurant.id,
-        "status": restaurant.status,
+        "message": restaurant_response["message"],
+        "restaurant_id": restaurant_data["id"],
+        "status": restaurant_data["status"],
     }
 
 

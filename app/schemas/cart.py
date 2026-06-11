@@ -8,7 +8,7 @@ class AddToCartSchema(BaseModel):
 
 
 class CartResponse(BaseModel):
-    id: UUID
+    id: int
     customer_id: UUID
     menu_item_id: UUID
     quantity: int
