@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
+from uuid import UUID
 
 from app.config.database import get_db
 
@@ -29,28 +30,9 @@ async def create_payment_method(
     )
 
 
-@router.get("/{payment_method_id}")
-async def get_payment_method(
-    payment_method_id: int,
-    db: AsyncSession = Depends(get_db)
-):
-    payment = await PaymentMethodService.get_payment_method(
-        db,
-        payment_method_id
-    )
-
-    if not payment:
-        raise HTTPException(
-            status_code=404,
-            detail="Payment method not found"
-        )
-
-    return payment
-
-
 @router.get("/customer/{customer_id}")
 async def customer_payments(
-    customer_id: int,
+    customer_id: UUID,
     db: AsyncSession = Depends(get_db)
 ):
     return await PaymentMethodService.get_customer_payments(
@@ -68,9 +50,28 @@ async def all_payments(
     )
 
 
+@router.get("/{payment_method_id}")
+async def get_payment_method(
+    payment_method_id: UUID,
+    db: AsyncSession = Depends(get_db)
+):
+    payment = await PaymentMethodService.get_payment_method(
+        db,
+        payment_method_id
+    )
+
+    if not payment:
+        raise HTTPException(
+            status_code=404,
+            detail="Payment method not found"
+        )
+
+    return payment
+
+
 @router.patch("/update/{payment_method_id}")
 async def update_payment(
-    payment_method_id: int,
+    payment_method_id: UUID,
     data: PaymentMethodUpdate,
     db: AsyncSession = Depends(get_db)
 ):
@@ -94,7 +95,7 @@ async def update_payment(
 
 @router.delete("/delete/{payment_method_id}")
 async def delete_payment(
-    payment_method_id: int,
+    payment_method_id: UUID,
     db: AsyncSession = Depends(get_db)
 ):
     payment = await PaymentMethodService.get_payment_method(
@@ -118,7 +119,7 @@ async def delete_payment(
 
 @router.post("/set-default/{payment_method_id}")
 async def set_default(
-    payment_method_id: int,
+    payment_method_id: UUID,
     db: AsyncSession = Depends(get_db)
 ):
     payment = await PaymentMethodService.get_payment_method(
@@ -136,7 +137,7 @@ async def set_default(
 
 @router.patch("/activate/{payment_method_id}")
 async def activate_payment(
-    payment_method_id: int,
+    payment_method_id: UUID,
     db: AsyncSession = Depends(get_db)
 ):
     payment = await PaymentMethodService.get_payment_method(
@@ -154,7 +155,7 @@ async def activate_payment(
 
 @router.patch("/deactivate/{payment_method_id}")
 async def deactivate_payment(
-    payment_method_id: int,
+    payment_method_id: UUID,
     db: AsyncSession = Depends(get_db)
 ):
     payment = await PaymentMethodService.get_payment_method(

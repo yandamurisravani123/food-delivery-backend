@@ -1,10 +1,11 @@
+import logging
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-from fastapi import logger
-
 from app.config.settings import settings
+
+logger = logging.getLogger(__name__)
 
 
 def send_otp_email(to_email: str, otp: str) -> None:
@@ -105,10 +106,14 @@ Food Delivery Team
     msg.attach(MIMEText(text_body, "plain"))
     msg.attach(MIMEText(html_body, "html"))
 
-    with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT) as server:
-        server.starttls()
-        server.login(settings.SMTP_USERNAME, settings.SMTP_PASSWORD)
-        server.sendmail(settings.FROM_EMAIL, [to_email], msg.as_string())
+    try:
+        with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT, timeout=20) as server:
+            server.starttls()
+            server.login(settings.SMTP_USERNAME, settings.SMTP_PASSWORD)
+            server.sendmail(settings.FROM_EMAIL, [to_email], msg.as_string())
+    except Exception as e:
+        logger.exception("Failed to send OTP email to %s", to_email)
+        raise
 
 
 def send_restaurant_approval_email(to_email: str, restaurant_name: str) -> None:
@@ -157,10 +162,13 @@ Food Delivery Team
     msg["From"] = settings.FROM_EMAIL
     msg["To"] = to_email
 
-    with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT, timeout=20) as server:
-        server.starttls()
-        server.login(settings.SMTP_USERNAME, settings.SMTP_PASSWORD)
-        server.sendmail(settings.FROM_EMAIL, [to_email], msg.as_string())
+    try:
+        with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT, timeout=20) as server:
+            server.starttls()
+            server.login(settings.SMTP_USERNAME, settings.SMTP_PASSWORD)
+            server.sendmail(settings.FROM_EMAIL, [to_email], msg.as_string())
+    except Exception:
+        logger.exception("Failed to send restaurant rejected email to %s", to_email)
 
 
 def send_delivery_approved_email(to_email: str, full_name: str) -> None:
@@ -183,10 +191,13 @@ Food Delivery Team
     msg["From"] = settings.FROM_EMAIL
     msg["To"] = to_email
 
-    with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT, timeout=20) as server:
-        server.starttls()
-        server.login(settings.SMTP_USERNAME, settings.SMTP_PASSWORD)
-        server.sendmail(settings.FROM_EMAIL, [to_email], msg.as_string())
+    try:
+        with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT, timeout=20) as server:
+            server.starttls()
+            server.login(settings.SMTP_USERNAME, settings.SMTP_PASSWORD)
+            server.sendmail(settings.FROM_EMAIL, [to_email], msg.as_string())
+    except Exception:
+        logger.exception("Failed to send delivery approved email to %s", to_email)
 
 
 def send_delivery_rejected_email(to_email: str, full_name: str) -> None:
@@ -207,7 +218,10 @@ Food Delivery Team
     msg["From"] = settings.FROM_EMAIL
     msg["To"] = to_email
 
-    with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT, timeout=20) as server:
-        server.starttls()
-        server.login(settings.SMTP_USERNAME, settings.SMTP_PASSWORD)
-        server.sendmail(settings.FROM_EMAIL, [to_email], msg.as_string())
+    try:
+        with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT, timeout=20) as server:
+            server.starttls()
+            server.login(settings.SMTP_USERNAME, settings.SMTP_PASSWORD)
+            server.sendmail(settings.FROM_EMAIL, [to_email], msg.as_string())
+    except Exception:
+        logger.exception("Failed to send delivery rejected email to %s", to_email)

@@ -5,6 +5,9 @@ from sqlalchemy.orm import load_only
 from app.models.restaurant import Restaurant
 
 
+
+
+
 class SearchService:
 
     @staticmethod
@@ -13,10 +16,10 @@ class SearchService:
         db: AsyncSession
     ):
 
-        stmt = (
+        query = (
             select(Restaurant)
             .options(
-                load_only(
+            load_only(
                     Restaurant.id,
                     Restaurant.restaurant_name,
                     Restaurant.city
@@ -24,13 +27,17 @@ class SearchService:
             )
             .where(
                 or_(
-                    Restaurant.restaurant_name.ilike(f"%{keyword}%"),
-                    Restaurant.city.ilike(f"%{keyword}%")
+                    Restaurant.restaurant_name.ilike(
+                        f"%{keyword}%"
+                    ),
+                    Restaurant.city.ilike(
+                        f"%{keyword}%"
+                    )
                 )
             )
         )
 
-        result = await db.execute(stmt)
+        result = await db.execute(query)
 
         restaurants = result.scalars().all()
 
@@ -39,10 +46,10 @@ class SearchService:
             "count": len(restaurants),
             "data": [
                 {
-                    "id": str(r.id),
-                    "restaurant_name": r.restaurant_name,
-                    "city": r.city
+                    "id": restaurant.id,
+                    "restaurant_name": restaurant.restaurant_name,
+                    "city": restaurant.city
                 }
-                for r in restaurants
+                for restaurant in restaurants
             ]
         }

@@ -59,9 +59,7 @@ async def reject_restaurant(
         "message": "Restaurant rejected successfully",
     }
 
-# ==============================
 # RESTAURANTS
-# ==============================
 
 @router.get("/restaurants", response_model=list[RestaurantOut])
 async def get_all_restaurants(
@@ -123,9 +121,7 @@ async def reject_delivery_agent(
         "message": "Delivery agent rejected successfully"
     }
 
-# ==============================
 # DELIVERY AGENTS
-# ==============================
 
 @router.get("/delivery-agents", response_model=list[DeliveryAgentOut])
 async def get_all_delivery_agents(

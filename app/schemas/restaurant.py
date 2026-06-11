@@ -38,7 +38,7 @@ class RestaurantOut(BaseModel):
     restaurant_name: str
     owner_name: str
     owner_email: EmailStr
-    owner_phone: str
+    owner_phone: Optional[str] = None
     restaurant_phone: str
     cuisine_types: Optional[str] = None
     address_line1: str
@@ -66,3 +66,9 @@ class RestaurantRegisterResponse(BaseModel):
     message: str
     restaurant_id: UUID
     status: str
+
+
+class PendingRestaurantsResponse(BaseModel):
+    success: bool
+    message: str
+    data: list[RestaurantOut]

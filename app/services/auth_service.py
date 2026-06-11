@@ -2,6 +2,7 @@ from datetime import datetime, timedelta, timezone
 import hashlib
 import secrets
 
+import smtplib
 from fastapi import HTTPException, status
 from jose import JWTError, jwt
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -45,6 +46,14 @@ class AuthService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Email already registered",
             )
+
+        if payload.phone:
+            existing_phone = await AuthRepository.get_user_by_phone(session, payload.phone)
+            if existing_phone:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Phone number already registered",
+                )
 
         hashed = hash_password(payload.password)
 
@@ -91,10 +100,18 @@ class AuthService:
         redis_key = f"otp:{payload.email.lower()}"
         await redis_client.setex(redis_key, 600, otp_hash)
 
-        send_otp_email(payload.email, otp)
+        try:
+            send_otp_email(payload.email, otp)
+            email_message = "OTP sent to email."
+        except smtplib.SMTPException as e:
+            email_message = (
+                "User registered successfully, but OTP email delivery failed. "
+                "Please verify your SMTP configuration or try again later."
+            )
+            print(f"Failed to send OTP email: {e}")
 
         return RegisterResponse(
-            message="User registered successfully. OTP sent to email.",
+            message=f"User registered successfully. {email_message}",
             user=UserOut(
                 id=user.id,
                 name=user.full_name,
@@ -156,7 +173,14 @@ class AuthService:
 
         await redis_client.setex(f"otp:{payload.email.lower()}", 600, otp_hash)
 
-        send_otp_email(payload.email, otp)
+        try:
+            send_otp_email(payload.email, otp)
+        except smtplib.SMTPException as e:
+            print(f"Failed to resend OTP email: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail="Failed to resend OTP email. Please check SMTP settings.",
+            )
 
         return MessageResponse(message="OTP resent successfully")
 

@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from uuid import UUID  # ✅ add this import
 
 from app.config.database import get_db
 
@@ -18,7 +19,7 @@ router = APIRouter(
 
 @router.get("/{user_id}")
 async def ai_recommendations(
-    user_id: int,
+    user_id: UUID,  # ✅ changed from int to UUID
     db: AsyncSession = Depends(get_db)
 ):
 

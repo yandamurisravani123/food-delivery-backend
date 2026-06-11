@@ -16,7 +16,7 @@ class PreferenceUpdate(BaseModel):
 
 
 class PreferenceResponse(BaseModel):
-    id: int
+    id: UUID          # ✅ Fixed: int -> UUID
     user_id: UUID
     favorite_cuisine: str
     spicy_level: str

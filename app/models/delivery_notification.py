@@ -1,46 +1,49 @@
+import uuid
+
 from sqlalchemy import (
     Column,
-    Integer,
     String,
     Boolean,
     ForeignKey
 )
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import mapped_column
 
 from app.config.database import Base
 
 
 class DeliveryNotification(Base):
 
-    __tablename__ = "delivery_notifications"
+    __tablename__ = "delivery_notification"
 
-    id = Column(
-        Integer,
+    notification_id = mapped_column(
+        UUID(as_uuid=True),
         primary_key=True,
-        index=True
+        default=uuid.uuid4
     )
 
-    user_id = Column(
-        Integer,
+    user_id = mapped_column(
+        UUID(as_uuid=True),
         nullable=False
     )
 
-    order_id = Column(
-        Integer,
+    order_id = mapped_column(
+        UUID(as_uuid=True),
         ForeignKey("orders.id"),
         nullable=False
     )
 
-    title = Column(
+    title = mapped_column(
         String,
         nullable=False
     )
 
-    message = Column(
+    message = mapped_column(
         String,
         nullable=False
     )
 
-    notification_type = Column(
+    notification_type = mapped_column(
         String,
         default="delivery_update"
     )
@@ -50,7 +53,7 @@ class DeliveryNotification(Base):
     # out_for_delivery
     # delivered
 
-    is_read = Column(
+    is_read = mapped_column(
         Boolean,
         default=False
     )

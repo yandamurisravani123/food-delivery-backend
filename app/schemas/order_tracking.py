@@ -10,7 +10,7 @@ class UpdateLocationSchema(BaseModel):
 
 
 class OrderTrackingResponse(BaseModel):
-    order_id: UUID
+    order_id: int
     status: str
     estimated_time: int
     latitude: float | None
