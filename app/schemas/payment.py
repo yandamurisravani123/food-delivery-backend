@@ -1,6 +1,5 @@
 from pydantic import BaseModel
 from typing import Literal, Optional
-from uuid import UUID
 
 
 class PaymentRequest(BaseModel):
@@ -10,6 +9,13 @@ class PaymentRequest(BaseModel):
     status: Optional[str] = "Pending"
 
 
+class PaymentResponse(BaseModel):
+    message: str
+    order_id: int
+    amount: float
+    payment_method: str
+    status: str
+
+
 class CODPaymentSchema(PaymentRequest):
     pass
- 

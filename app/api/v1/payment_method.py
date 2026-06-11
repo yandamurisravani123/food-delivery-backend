@@ -25,7 +25,7 @@ async def create_payment(
     payment = Payment(
         order_id=payload.order_id,
         amount=payload.amount,
-        payment_method=payload.payment_method.value,
+        payment_type=payload.payment_type,
         status=payload.status.value
     )
 
