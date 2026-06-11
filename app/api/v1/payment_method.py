@@ -8,6 +8,8 @@ from app.schemas.payment import (
     PaymentRequest,
     PaymentResponse
 )
+from app.services.payment_method_service import PaymentMethodService
+from app.schemas.payment_method import PaymentMethodUpdate
 
 router = APIRouter(
     prefix="/payments",
@@ -31,12 +33,8 @@ async def create_payment(
     )
 
     db.add(payment)
-
-<<<<<<< HEAD
     await db.commit()
-
     await db.refresh(payment)
-
     return PaymentResponse(
         message="Payment created successfully",
         order_id=payment.order_id,
@@ -44,7 +42,7 @@ async def create_payment(
         payment_method=payload.payment_method,
         status=payload.status
     )
-=======
+
 @router.get("/customer/{customer_id}")
 async def customer_payments(
     customer_id: UUID,
@@ -184,4 +182,4 @@ async def deactivate_payment(
     )
 
     return {"message": "Deactivated"}
->>>>>>> 2f6cbfeb697fc8df4b0e6dc03fde77b955d4c69c
+

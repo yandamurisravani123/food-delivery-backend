@@ -134,11 +134,10 @@ async def lifespan(app: FastAPI):
     if redis_available:
         print("Redis Connected")
     else:
-<<<<<<< HEAD
-        print("⚠️ Redis not available, continuing without Redis")
-=======
+
+
         print(" Redis not available, continuing without Redis")
->>>>>>> 2f6cbfeb697fc8df4b0e6dc03fde77b955d4c69c
+
 
     # REQUIRED
     yield
