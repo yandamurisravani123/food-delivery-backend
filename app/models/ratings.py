@@ -16,9 +16,13 @@ from app.config.database import Base
 class Rating(Base):
     __tablename__ = "ratings"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+        index=True
+    )
 
-    # FIXED: INTEGER -> UUID
     customer_id = Column(
         UUID(as_uuid=True),
         ForeignKey("users.id"),
@@ -26,13 +30,13 @@ class Rating(Base):
     )
 
     driver_id = Column(
-        Integer,
+        UUID(as_uuid=True),
         ForeignKey("drivers.id"),
         nullable=True
     )
 
     order_id = Column(
-        Integer,
+        UUID(as_uuid=True),
         ForeignKey("orders.id"),
         nullable=False
     )

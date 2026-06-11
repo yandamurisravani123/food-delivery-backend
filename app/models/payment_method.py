@@ -1,3 +1,5 @@
+import uuid
+
 from sqlalchemy import (
     Column,
     String,
@@ -16,8 +18,9 @@ class PaymentMethod(Base):
     __tablename__ = "payment_methods"
 
     id = Column(
-        Integer,
+        UUID(as_uuid=True),
         primary_key=True,
+        default=uuid.uuid4,
         index=True
     )
 

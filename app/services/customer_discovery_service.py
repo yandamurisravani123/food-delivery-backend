@@ -97,7 +97,24 @@ class CustomerDiscoveryService:
             )
         )
 
-        return result.scalars().all()
+        restaurants = result.scalars().all()
+
+        return {
+            "success": True,
+            "count": len(restaurants),
+            "data": [
+                {
+                    "id": str(restaurant.id),
+                    "restaurant_name": restaurant.restaurant_name,
+                    "city": restaurant.city,
+                    "cuisine_types": restaurant.cuisine_types,
+                    "is_active": restaurant.is_active,
+                    "is_trending": restaurant.is_trending,
+                    "is_top_rated": restaurant.is_top_rated
+                }
+                for restaurant in restaurants
+            ]
+        }
 
     @staticmethod
     async def top_rated(

@@ -24,6 +24,19 @@ async def create_preference(
     payload: PreferenceCreate,
     db: AsyncSession = Depends(get_db)
 ):
+    # Check if preference already exists for this user
+    result = await db.execute(
+        select(UserPreference).where(
+            UserPreference.user_id == payload.user_id
+        )
+    )
+    existing = result.scalar_one_or_none()
+
+    if existing:
+        raise HTTPException(
+            status_code=400,
+            detail="Preference already exists for this user"
+        )
 
     new_preference = UserPreference(
         user_id=payload.user_id,
@@ -69,10 +82,10 @@ async def get_user_preference(
     result = await db.execute(
         select(UserPreference).where(
             UserPreference.user_id == user_id
-        )
+        ).limit(1)  # Fixed: limit to 1 row to avoid MultipleResultsFound
     )
 
-    preference = result.scalar()
+    preference = result.scalar_one_or_none()  # Fixed: use scalar_one_or_none()
 
     if not preference:
         raise HTTPException(
@@ -97,7 +110,7 @@ async def update_preference(
         )
     )
 
-    preference = result.scalar()
+    preference = result.scalar_one_or_none()  # Fixed: use scalar_one_or_none()
 
     if not preference:
         raise HTTPException(
@@ -132,7 +145,7 @@ async def delete_preference(
         )
     )
 
-    preference = result.scalar()
+    preference = result.scalar_one_or_none()  # Fixed: use scalar_one_or_none()
 
     if not preference:
         raise HTTPException(

@@ -11,7 +11,7 @@ from app.services.cart_service import (
 )
 
 router = APIRouter(
-    prefix="/api/v1/cart",
+    prefix="/cart",
     tags=["Cart"]
 )
 
@@ -35,16 +35,23 @@ async def add_to_cart(
 
     return cart_item
 
-from fastapi import APIRouter
+# from fastapi import APIRouter
 
-router = APIRouter()
-
-
-@router.post("/add")
-async def add_to_cart():
-    return {"message": "Item added to cart"}
+# router = APIRouter()
 
 
-@router.get("/")
-async def get_cart():
-    return {"message": "Cart fetched"}
+# @router.post("/add")
+# async def add_to_cart():
+#     return {"message": "Item added to cart"}
+
+
+# @router.get("/")
+# async def get_cart():
+#     return {"message": "Cart fetched"}
+
+
+@router.get("/test")
+async def test_cart():
+    return {
+        "message": "cart router loaded"
+    }

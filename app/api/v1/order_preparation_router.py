@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
+from uuid import UUID
 
 from app.config.database import get_db
 from app.services.order_preparation_service import OrderPreparationService
@@ -7,16 +8,16 @@ from app.services.order_preparation_service import OrderPreparationService
 router = APIRouter(prefix="/orders", tags=["Order Preparation"])
 
 
-# ✅ GET ORDER PREPARATION SCREEN
+# GET ORDER PREPARATION SCREEN
 @router.get("/{order_id}/preparation")
-async def get_preparation(order_id: int, db: AsyncSession = Depends(get_db)):
+async def get_preparation(order_id: UUID, db: AsyncSession = Depends(get_db)):
     return await OrderPreparationService.get_preparation(db, order_id)
 
 
-# ✅ UPDATE CHEF PROGRESS (75%, cooking, QC etc.)
+# UPDATE CHEF PROGRESS (75%, cooking, QC etc.)
 @router.patch("/{order_id}/preparation")
 async def update_preparation(
-    order_id: int,
+    order_id: UUID,
     stage: str,
     progress: int,
     note: str | None = None,
