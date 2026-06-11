@@ -6,10 +6,11 @@ from sqlalchemy import (
     Float,
     ForeignKey,
     DateTime,
-    Integer
+    
 )
 
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import ForeignKey
 
 from sqlalchemy.orm import relationship
 
@@ -28,11 +29,10 @@ class Invoice(Base):
         default=uuid.uuid4
     )
 
-    # FIXED
     order_id = Column(
-        Integer,
-        ForeignKey("orders.id"),
-        nullable=False
+    UUID(as_uuid=True),
+    ForeignKey("orders.id"),
+    nullable=False
     )
 
     invoice_number = Column(
