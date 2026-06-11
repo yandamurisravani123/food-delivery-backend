@@ -1,10 +1,5 @@
-<<<<<<< HEAD
 
-from fastapi import APIRouter, Depends
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
-=======
->>>>>>> 2f6cbfeb697fc8df4b0e6dc03fde77b955d4c69c
+
 from uuid import UUID
 
 from fastapi import APIRouter, Depends
