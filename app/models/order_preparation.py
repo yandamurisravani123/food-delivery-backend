@@ -1,4 +1,6 @@
+import uuid
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
+from sqlalchemy.dialects.postgresql import UUID
 from datetime import datetime
 from app.config.database import Base
 
@@ -6,8 +8,18 @@ from app.config.database import Base
 class OrderPreparation(Base):
     __tablename__ = "order_preparations"
 
-    id = Column(Integer, primary_key=True, index=True)
-    order_id = Column(Integer, ForeignKey("orders.id"), unique=True)
+    id = Column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+        index=True
+    )
+
+    order_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("orders.id"),
+        unique=True
+    )
 
     current_stage = Column(String, default="ORDER_RECEIVED")
     progress_percent = Column(Integer, default=0)

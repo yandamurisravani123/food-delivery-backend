@@ -66,13 +66,10 @@ from app.api.v1.customer.tracking_router import router as tracking_detail_router
 from app.api.v1.customer.notification_router import router as notification_router
 from app.api.v1.driver.router import router as driver_router
 
+# =====================================================
 # ROUTERS — Sravani Features (LEV-165)
-<<<<<<< HEAD
-from app.api.v1.cart_router import router as cart_router
-=======
 # =====================================================
 from app.api.v1.customer.cart_router import router as cart_router
->>>>>>> 81a7d48d016c94dcee7c2e99ad3bb275aa433dca
 from app.api.v1.order_tracking import router as order_tracking_router
 from app.api.v1.delivery_notification_router import router as delivery_notification_router
 from app.api.v1.payment_method import router as payment_method_router
@@ -120,11 +117,11 @@ async def lifespan(app: FastAPI):
             "ALTER TABLE orders ADD COLUMN IF NOT EXISTS total DOUBLE PRECISION NOT NULL DEFAULT 0.0",
             "ALTER TABLE restaurants ADD COLUMN IF NOT EXISTS is_trending BOOLEAN NOT NULL DEFAULT FALSE",
             "ALTER TABLE restaurants ADD COLUMN IF NOT EXISTS is_top_rated BOOLEAN NOT NULL DEFAULT FALSE",
-            "ALTER TABLE restaurants ADD COLUMN IF NOT EXISTS approved_at TIMESTAMP WITH TIME ZONE", 
+            "ALTER TABLE restaurants ADD COLUMN IF NOT EXISTS approved_at TIMESTAMP WITH TIME ZONE",
             "ALTER TABLE user_preferences ALTER COLUMN user_id TYPE UUID USING user_id::text::uuid",
             "ALTER TABLE user_preferences ALTER COLUMN id TYPE UUID USING id::text::uuid",
-]
-        
+        ]
+
         for stmt in alter_statements:
             try:
                 await conn.execute(text(stmt))

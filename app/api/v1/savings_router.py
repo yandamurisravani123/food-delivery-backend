@@ -1,7 +1,9 @@
-from fastapi import APIRouter, Depends
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
 from uuid import UUID
+
+from fastapi import APIRouter, Depends
+from sqlalchemy import func, select
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.config.database import get_db
 from app.models.order import Order
 
@@ -15,10 +17,6 @@ async def savings_overview(
     user_id: UUID,
     db: AsyncSession = Depends(get_db)
 ):
-    """
-    Total savings of a user (all time)
-    """
-
     result = await db.execute(
         select(func.sum(Order.discount_amount))
         .where(Order.user_id == user_id)
@@ -27,7 +25,7 @@ async def savings_overview(
     total_savings = result.scalar() or 0
 
     return {
-        "user_id": user_id,
+        "user_id": str(user_id),
         "total_savings": float(total_savings),
         "currency": "INR"
     }
@@ -40,10 +38,6 @@ async def monthly_savings(
     user_id: UUID,
     db: AsyncSession = Depends(get_db)
 ):
-    """
-    Month-wise savings
-    """
-
     result = await db.execute(
         select(
             func.extract("month", Order.created_at).label("month"),
@@ -51,13 +45,13 @@ async def monthly_savings(
         )
         .where(Order.user_id == user_id)
         .group_by(func.extract("month", Order.created_at))
-        .order_by("month")
+        .order_by(func.extract("month", Order.created_at))
     )
 
     rows = result.all()
 
     return {
-        "user_id": user_id,
+        "user_id": str(user_id),
         "monthly_savings": [
             {
                 "month": int(row.month),
@@ -75,39 +69,34 @@ async def savings_compare(
     user_id: UUID,
     db: AsyncSession = Depends(get_db)
 ):
-    """
-    Compare total spend vs total savings
-    """
-
     result = await db.execute(
         select(
-            func.sum(Order.total_amount),
-            func.sum(Order.discount_amount)
+            func.sum(Order.total).label("total_spent"),
+            func.sum(Order.discount_amount).label("total_saved")
         )
         .where(Order.user_id == user_id)
     )
 
-    total_spent, total_saved = result.one()
+    row = result.one()
+
+    total_spent = row.total_spent or 0
+    total_saved = row.total_saved or 0
 
     return {
-        "user_id": user_id,
-        "total_spent": float(total_spent or 0),
-        "total_saved": float(total_saved or 0),
-        "net_spent": float((total_spent or 0) - (total_saved or 0))
+        "user_id": str(user_id),
+        "total_spent": float(total_spent),
+        "total_saved": float(total_saved),
+        "net_spent": float(total_spent - total_saved)
     }
 
 
-# 4. DAILY SAVINGS (OPTIONAL DASHBOARD)
+# 4. DAILY SAVINGS
 
 @router.get("/savings/daily")
 async def daily_savings(
     user_id: UUID,
     db: AsyncSession = Depends(get_db)
 ):
-    """
-    Day-wise savings for charts
-    """
-
     result = await db.execute(
         select(
             func.date(Order.created_at).label("date"),
@@ -115,13 +104,13 @@ async def daily_savings(
         )
         .where(Order.user_id == user_id)
         .group_by(func.date(Order.created_at))
-        .order_by("date")
+        .order_by(func.date(Order.created_at))
     )
 
     rows = result.all()
 
     return {
-        "user_id": user_id,
+        "user_id": str(user_id),
         "daily_savings": [
             {
                 "date": str(row.date),
