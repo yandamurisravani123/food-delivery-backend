@@ -91,3 +91,8 @@ class OrderItem(Base):
     price = Column(Float, nullable=False, default=0.0)
 
     order = relationship("Order", back_populates="items")
+    notifications = relationship(
+    "DeliveryNotification",
+    back_populates="order",
+    cascade="all, delete-orphan"
+    )
